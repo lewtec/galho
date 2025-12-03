@@ -15,6 +15,7 @@ type Task struct {
 	Name        string
 	Description string
 	Run         string
+	Dir         string
 	Depends     []string
 }
 

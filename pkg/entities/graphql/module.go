@@ -45,6 +45,7 @@ func (m *GraphQLModule) GenerateTasks() ([]core.Task, error) {
 			Name:        taskName,
 			Description: fmt.Sprintf("Generate GraphQL code for %s", m.name),
 			Run:         fmt.Sprintf("gqlgen generate -c %s", configPath),
+			Dir:         m.path,
 		},
 	}, nil
 }

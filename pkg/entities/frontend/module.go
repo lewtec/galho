@@ -56,6 +56,7 @@ func (m *FrontendModule) GenerateTasks() ([]core.Task, error) {
 			Name:        taskName,
 			Description: fmt.Sprintf("Generate Relay code for %s", m.name),
 			Run:         runCmd,
+			Dir:         m.path,
 		},
 	}, nil
 }

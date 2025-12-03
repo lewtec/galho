@@ -18,6 +18,7 @@ type MiseTask struct {
 	Description string   `toml:"description,omitempty"`
 	Run         string   `toml:"run,omitempty"`
 	Depends     []string `toml:"depends,omitempty"`
+	Dir         string   `toml:"dir,omitempty"`
 }
 
 type MiseConfig struct {
@@ -31,9 +32,7 @@ func GenerateTasksToml(projectRoot string) error {
 		return err
 	}
 
-	config := MiseConfig{
-		Tasks: make(map[string]MiseTask),
-	}
+	config := make(map[string]MiseTask)
 
 	for _, mod := range modules {
 		tasks, err := mod.GenerateTasks()
@@ -42,16 +41,17 @@ func GenerateTasksToml(projectRoot string) error {
 		}
 
 		for _, task := range tasks {
-			config.Tasks[task.Name] = MiseTask{
+			config[task.Name] = MiseTask{
 				Description: task.Description,
 				Run:         task.Run,
 				Depends:     task.Depends,
+				Dir:         task.Dir,
 			}
 		}
 	}
 
 	// Add gen:all task
-	config.Tasks["gen"] = MiseTask{
+	config["gen"] = MiseTask{
 		Description: "Generate all code",
 		Depends:     []string{"gen:*"},
 	}
@@ -61,7 +61,7 @@ func GenerateTasksToml(projectRoot string) error {
 		return err
 	}
 
-	outputPath := filepath.Join(miseDir, "tasks.toml")
+	outputPath := filepath.Join(miseDir, "galho.toml")
 
 	f, err := os.Create(outputPath)
 	if err != nil {

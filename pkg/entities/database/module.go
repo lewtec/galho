@@ -50,6 +50,7 @@ func (m *DatabaseModule) GenerateTasks() ([]core.Task, error) {
 			Name:        taskName,
 			Description: fmt.Sprintf("Generate SQLC code for %s", m.name),
 			Run:         fmt.Sprintf("sqlc generate -f %s", sqlcConfigPath),
+			Dir:         m.path,
 		},
 	}, nil
 }
