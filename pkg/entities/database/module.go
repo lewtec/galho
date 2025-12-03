@@ -41,6 +41,10 @@ func (m *DatabaseModule) Path() string {
 	return m.path
 }
 
+func (m *DatabaseModule) Name() string {
+	return m.name
+}
+
 func (m *DatabaseModule) GenerateTasks() ([]core.Task, error) {
 	taskName := fmt.Sprintf("gen:%s:db:sqlc", m.name)
 

@@ -6,6 +6,8 @@ type Module interface {
 	Type() string
 	// Path returns the path to the module relative to the project root.
 	Path() string
+	// Name returns a friendly name for the module (e.g., "crm", "auth").
+	Name() string
 	// GenerateTasks returns the mise tasks for this module.
 	GenerateTasks() ([]Task, error)
 }

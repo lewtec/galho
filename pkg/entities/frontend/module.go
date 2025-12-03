@@ -38,6 +38,10 @@ func (m *FrontendModule) Path() string {
 	return m.path
 }
 
+func (m *FrontendModule) Name() string {
+	return m.name
+}
+
 func (m *FrontendModule) GenerateTasks() ([]core.Task, error) {
 	taskName := fmt.Sprintf("gen:%s:frontend:relay", m.name)
 

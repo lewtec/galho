@@ -36,6 +36,10 @@ func (m *GraphQLModule) Path() string {
 	return m.path
 }
 
+func (m *GraphQLModule) Name() string {
+	return m.name
+}
+
 func (m *GraphQLModule) GenerateTasks() ([]core.Task, error) {
 	taskName := fmt.Sprintf("gen:%s:api:gqlgen", m.name)
 
