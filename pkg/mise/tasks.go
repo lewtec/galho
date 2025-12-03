@@ -10,7 +10,19 @@ import (
 	"galho/pkg/database"
 	"galho/pkg/frontend"
 	"galho/pkg/graphql"
+
+	toml "github.com/pelletier/go-toml/v2"
 )
+
+type MiseTask struct {
+	Description string   `toml:"description,omitempty"`
+	Run         string   `toml:"run,omitempty"`
+	Depends     []string `toml:"depends,omitempty"`
+}
+
+type MiseConfig struct {
+	Tasks map[string]MiseTask `toml:"tasks"`
+}
 
 // GenerateTasksToml scans the project and generates the .mise/tasks.toml file.
 func GenerateTasksToml(projectRoot string) error {
@@ -19,8 +31,9 @@ func GenerateTasksToml(projectRoot string) error {
 		return err
 	}
 
-	var sb strings.Builder
-	var allTaskNames []string
+	config := MiseConfig{
+		Tasks: make(map[string]MiseTask),
+	}
 
 	for _, mod := range modules {
 		tasks, err := mod.GenerateTasks()
@@ -29,38 +42,19 @@ func GenerateTasksToml(projectRoot string) error {
 		}
 
 		for _, task := range tasks {
-			allTaskNames = append(allTaskNames, fmt.Sprintf("%q", task.Name))
-
-			sb.WriteString(fmt.Sprintf("[tasks.%q]\n", task.Name))
-			if task.Description != "" {
-				sb.WriteString(fmt.Sprintf("description = %q\n", task.Description))
+			config.Tasks[task.Name] = MiseTask{
+				Description: task.Description,
+				Run:         task.Run,
+				Depends:     task.Depends,
 			}
-
-			// If run is multiline, use triple quotes
-			if strings.Contains(task.Run, "\n") {
-				sb.WriteString(fmt.Sprintf("run = \"\"\"\n%s\n\"\"\"\n", task.Run))
-			} else {
-				sb.WriteString(fmt.Sprintf("run = %q\n", task.Run))
-			}
-
-			if len(task.Depends) > 0 {
-				sb.WriteString("depends = [")
-				for i, dep := range task.Depends {
-					if i > 0 {
-						sb.WriteString(", ")
-					}
-					sb.WriteString(fmt.Sprintf("%q", dep))
-				}
-				sb.WriteString("]\n")
-			}
-			sb.WriteString("\n")
 		}
 	}
 
 	// Add gen:all task
-	sb.WriteString("[tasks.gen]\n")
-	sb.WriteString("description = \"Generate all code\"\n")
-	sb.WriteString("depends = [\"gen:*\"]\n") // Mise supports wildcards in depends, but explicit list is safer if not. Spec says depends = ["gen:*"]
+	config.Tasks["gen"] = MiseTask{
+		Description: "Generate all code",
+		Depends:     []string{"gen:*"},
+	}
 
 	miseDir := filepath.Join(projectRoot, ".mise")
 	if err := os.MkdirAll(miseDir, 0755); err != nil {
@@ -68,7 +62,17 @@ func GenerateTasksToml(projectRoot string) error {
 	}
 
 	outputPath := filepath.Join(miseDir, "tasks.toml")
-	if err := os.WriteFile(outputPath, []byte(sb.String()), 0644); err != nil {
+
+	f, err := os.Create(outputPath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	encoder := toml.NewEncoder(f)
+	// Mise often prefers multiline strings for 'run' if they are long, but standard toml encoder
+	// might handle it its own way. go-toml v2 is compliant.
+	if err := encoder.Encode(config); err != nil {
 		return err
 	}
 
