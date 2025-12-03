@@ -1,0 +1,7 @@
+module.exports = {
+  src: '.',
+  language: 'typescript',
+  schema: '../api/schema.graphql',
+  exclude: ['**/node_modules/**', '**/__generated__/**'],
+  artifactDirectory: './src/__generated__',
+};
