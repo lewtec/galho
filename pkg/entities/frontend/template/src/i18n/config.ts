@@ -8,11 +8,18 @@ const resources = {
   pt: { translation: pt },
 };
 
+// Detect browser language
+const getBrowserLanguage = (): string => {
+  const browserLang = navigator.language.split('-')[0]; // Get language code without region
+  // Return browser language if we support it, otherwise fallback to 'en'
+  return resources[browserLang as keyof typeof resources] ? browserLang : 'en';
+};
+
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: 'en',
+    lng: getBrowserLanguage(),
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false,
