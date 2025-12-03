@@ -45,10 +45,7 @@ func (m *FrontendModule) GenerateTasks() ([]core.Task, error) {
 	// For now, I will use a placeholder or look for a sibling 'api' directory.
 	// Assuming structure internal/NAME/frontend and internal/NAME/api
 	// Using relative path from the frontend directory to the api directory
-	runCmd := `relay-compiler \
-  --src . \
-  --schema ../api/schema.graphql \
-  --language typescript`
+	runCmd := `bun run relay-compiler`
 
 	return []core.Task{
 		{
