@@ -18,3 +18,7 @@ func GetProject() (*Project, error) {
 	projectRoot := path.Dir(dotgalho)
 	return &Project{projectRoot}, nil
 }
+
+func (p *Project) Dir() string {
+	return p.dir
+}

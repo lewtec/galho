@@ -2,7 +2,7 @@ package core
 
 import "fmt"
 
-var moduleFinders map[string]func(*Project) ([]Module, error)
+var moduleFinders = make(map[string]func(*Project) ([]Module, error))
 
 type ModuleFound struct {
 	Finder string

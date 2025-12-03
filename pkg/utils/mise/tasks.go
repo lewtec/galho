@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"galho/pkg/core"
-	"galho/pkg/entities/database"
-	"galho/pkg/entities/frontend"
-	"galho/pkg/entities/graphql"
+	// Import entities to trigger init() and register finders
+	_ "galho/pkg/entities/database"
+	_ "galho/pkg/entities/frontend"
+	_ "galho/pkg/entities/graphql"
 
 	toml "github.com/pelletier/go-toml/v2"
 )
@@ -27,17 +27,19 @@ type MiseConfig struct {
 
 // GenerateTasksToml scans the project and generates the .mise/tasks.toml file.
 func GenerateTasksToml(projectRoot string) error {
-	modules, err := detectModules(projectRoot)
+	project, err := core.GetProject()
 	if err != nil {
 		return err
 	}
 
 	config := make(map[string]MiseTask)
 
-	for _, mod := range modules {
-		tasks, err := mod.GenerateTasks()
+	err = project.FindModules(func(found core.ModuleFound) bool {
+		tasks, err := found.Module.GenerateTasks()
 		if err != nil {
-			return err
+			// Log error but continue processing other modules
+			fmt.Printf("Error generating tasks for module %s: %v\n", found.Module.Path(), err)
+			return true
 		}
 
 		for _, task := range tasks {
@@ -48,6 +50,11 @@ func GenerateTasksToml(projectRoot string) error {
 				Dir:         task.Dir,
 			}
 		}
+		return true
+	})
+
+	if err != nil {
+		return err
 	}
 
 	// Add gen:all task
@@ -78,39 +85,4 @@ func GenerateTasksToml(projectRoot string) error {
 
 	fmt.Printf("Mise tasks generated at %s\n", outputPath)
 	return nil
-}
-
-func detectModules(root string) ([]core.Module, error) {
-	var modules []core.Module
-
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if info.IsDir() {
-			// Skip .git, node_modules, etc
-			if strings.HasPrefix(info.Name(), ".") || info.Name() == "node_modules" {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-
-		// Check for specific files to identify modules
-		if info.Name() == "sqlc.yaml" {
-			modules = append(modules, database.NewDatabaseModule(filepath.Dir(path)))
-		} else if info.Name() == "gqlgen.yml" {
-			modules = append(modules, graphql.NewGraphQLModule(filepath.Dir(path)))
-		} else if info.Name() == "package.json" {
-			// Check if it's a frontend module (e.g. has App.tsx)
-			// This is a simplification. Spec says: "contém package.json + App.tsx"
-			dir := filepath.Dir(path)
-			if _, err := os.Stat(filepath.Join(dir, "App.tsx")); err == nil {
-				modules = append(modules, frontend.NewFrontendModule(dir))
-			}
-		}
-
-		return nil
-	})
-
-	return modules, err
 }
