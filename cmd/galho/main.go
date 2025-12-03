@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
+	"galho/pkg/entities/core"
+	"galho/pkg/entities/database"
+	"galho/pkg/entities/frontend"
+	"galho/pkg/entities/graphql"
+	"galho/pkg/utils/mise"
+	"galho/pkg/utils/scaffold"
 	"os"
-	"path/filepath"
-
-	"galho/pkg/database"
-	"galho/pkg/frontend"
-	"galho/pkg/graphql"
-	"galho/pkg/mise"
 
 	"github.com/spf13/cobra"
 )
@@ -20,35 +20,14 @@ func main() {
 	}
 
 	var initCmd = &cobra.Command{
-		Use:   "init [name]",
-		Short: "Initialize a new project",
-		Args:  cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			projectName := args[0]
-			fmt.Printf("Initializing project %s\n", projectName)
-
-			// Create project directory
-			if err := os.MkdirAll(projectName, 0755); err != nil {
-				fmt.Printf("Error creating project directory: %v\n", err)
-				os.Exit(1)
+		Use:   "init",
+		Short: "Initialize a new project in the current directory",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			workingDir, err := os.Getwd()
+			if err != nil {
+				return fmt.Errorf("error getting work directory: %w", err)
 			}
-
-			// Create .mise/tasks.toml
-			if err := os.MkdirAll(filepath.Join(projectName, ".mise"), 0755); err != nil {
-				fmt.Printf("Error creating .mise directory: %v\n", err)
-				os.Exit(1)
-			}
-
-			// Create mise.toml
-			miseToml := `_.file.includes = [".mise/tasks.toml"]
-
-[tasks.dev]
-run = "air"
-`
-			if err := os.WriteFile(filepath.Join(projectName, "mise.toml"), []byte(miseToml), 0644); err != nil {
-				fmt.Printf("Error creating mise.toml: %v\n", err)
-				os.Exit(1)
-			}
+			scaffold.InstallFS(workingDir, core.Template)
 
 			fmt.Println("Project initialized successfully.")
 		},
@@ -63,12 +42,10 @@ run = "air"
 		Use:   "database [path]",
 		Short: "Generate a database module",
 		Args:  cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			path := args[0]
-			if err := database.Generate(path); err != nil {
-				fmt.Printf("Error generating database module: %v\n", err)
-				os.Exit(1)
-			}
+
+			return scaffold.InstallFS(path, database.Template)
 		},
 	}
 
@@ -76,12 +53,10 @@ run = "air"
 		Use:   "graphql [path]",
 		Short: "Generate a graphql module",
 		Args:  cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			path := args[0]
-			if err := graphql.Generate(path); err != nil {
-				fmt.Printf("Error generating graphql module: %v\n", err)
-				os.Exit(1)
-			}
+
+			return scaffold.InstallFS(path, graphql.Template)
 		},
 	}
 
@@ -89,12 +64,9 @@ run = "air"
 		Use:   "frontend [path]",
 		Short: "Generate a frontend module",
 		Args:  cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			path := args[0]
-			if err := frontend.Generate(path); err != nil {
-				fmt.Printf("Error generating frontend module: %v\n", err)
-				os.Exit(1)
-			}
+			return scaffold.InstallFS(path, frontend.Template)
 		},
 	}
 

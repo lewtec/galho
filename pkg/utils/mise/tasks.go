@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"galho/pkg/core"
-	"galho/pkg/database"
-	"galho/pkg/frontend"
-	"galho/pkg/graphql"
+	"galho/pkg/entities/database"
+	"galho/pkg/entities/frontend"
+	"galho/pkg/entities/graphql"
 
 	toml "github.com/pelletier/go-toml/v2"
 )
