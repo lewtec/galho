@@ -43,13 +43,12 @@ func (m *DatabaseModule) Path() string {
 
 func (m *DatabaseModule) GenerateTasks() ([]core.Task, error) {
 	taskName := fmt.Sprintf("gen:%s:db:sqlc", m.name)
-	sqlcConfigPath := filepath.Join(m.path, "sqlc.yaml")
 
 	return []core.Task{
 		{
 			Name:        taskName,
 			Description: fmt.Sprintf("Generate SQLC code for %s", m.name),
-			Run:         fmt.Sprintf("sqlc generate -f %s", sqlcConfigPath),
+			Run:         "sqlc generate -f sqlc.yaml",
 			Dir:         m.path,
 		},
 	}, nil

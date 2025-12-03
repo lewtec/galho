@@ -43,11 +43,20 @@ func GenerateTasksToml(projectRoot string) error {
 		}
 
 		for _, task := range tasks {
+			// Convert task.Dir to relative path if it's absolute
+			taskDir := task.Dir
+			if filepath.IsAbs(taskDir) {
+				relDir, err := filepath.Rel(project.Dir(), taskDir)
+				if err == nil {
+					taskDir = relDir
+				}
+			}
+
 			config[task.Name] = MiseTask{
 				Description: task.Description,
 				Run:         task.Run,
 				Depends:     task.Depends,
-				Dir:         task.Dir,
+				Dir:         taskDir,
 			}
 		}
 		return true

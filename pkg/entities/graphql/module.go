@@ -38,13 +38,12 @@ func (m *GraphQLModule) Path() string {
 
 func (m *GraphQLModule) GenerateTasks() ([]core.Task, error) {
 	taskName := fmt.Sprintf("gen:%s:api:gqlgen", m.name)
-	configPath := filepath.Join(m.path, "gqlgen.yml")
 
 	return []core.Task{
 		{
 			Name:        taskName,
 			Description: fmt.Sprintf("Generate GraphQL code for %s", m.name),
-			Run:         fmt.Sprintf("gqlgen generate -c %s", configPath),
+			Run:         "gqlgen generate -c gqlgen.yml",
 			Dir:         m.path,
 		},
 	}, nil

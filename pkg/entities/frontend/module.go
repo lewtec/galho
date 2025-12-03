@@ -44,12 +44,11 @@ func (m *FrontendModule) GenerateTasks() ([]core.Task, error) {
 	// TODO: Smarter schema detection.
 	// For now, I will use a placeholder or look for a sibling 'api' directory.
 	// Assuming structure internal/NAME/frontend and internal/NAME/api
-	schemaPath := filepath.Join(filepath.Dir(m.path), "api", "schema.graphql")
-
-	runCmd := fmt.Sprintf(`relay-compiler \
-  --src %s \
-  --schema %s \
-  --language typescript`, m.path, schemaPath)
+	// Using relative path from the frontend directory to the api directory
+	runCmd := `relay-compiler \
+  --src . \
+  --schema ../api/schema.graphql \
+  --language typescript`
 
 	return []core.Task{
 		{
