@@ -149,23 +149,88 @@ func listMigrations(module *DatabaseModule) error {
 		return fmt.Errorf("failed to read migrations: %w", err)
 	}
 
-	// Filter and display SQL files
-	fmt.Printf("Migrations in %s:\n\n", module.Name())
+	// Group migrations by base name (removing .up/.down suffix)
+	migrations := make(map[string]struct {
+		hasUp   bool
+		hasDown bool
+		modTime time.Time
+	})
 
-	count := 0
 	for _, entry := range entries {
-		if !entry.IsDir() && filepath.Ext(entry.Name()) == ".sql" {
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".sql" {
+			continue
+		}
+
+		name := entry.Name()
+		var baseName string
+
+		// Remove .up.sql or .down.sql suffix to get base name
+		if len(name) > 7 && name[len(name)-7:] == ".up.sql" {
+			baseName = name[:len(name)-7]
 			info, _ := entry.Info()
-			fmt.Printf("  %s  (%s)\n", entry.Name(), info.ModTime().Format("2006-01-02 15:04"))
-			count++
+			m := migrations[baseName]
+			m.hasUp = true
+			m.modTime = info.ModTime()
+			migrations[baseName] = m
+		} else if len(name) > 9 && name[len(name)-9:] == ".down.sql" {
+			baseName = name[:len(name)-9]
+			info, _ := entry.Info()
+			m := migrations[baseName]
+			m.hasDown = true
+			if m.modTime.IsZero() || info.ModTime().After(m.modTime) {
+				m.modTime = info.ModTime()
+			}
+			migrations[baseName] = m
+		} else {
+			// Handle other .sql files (legacy format without .up/.down)
+			baseName = name[:len(name)-4]
+			info, _ := entry.Info()
+			migrations[baseName] = struct {
+				hasUp   bool
+				hasDown bool
+				modTime time.Time
+			}{hasUp: true, hasDown: false, modTime: info.ModTime()}
 		}
 	}
 
-	if count == 0 {
+	// Display migrations
+	fmt.Printf("Migrations in %s:\n\n", module.Name())
+
+	if len(migrations) == 0 {
 		fmt.Println("  No migrations found")
-	} else {
-		fmt.Printf("\nTotal: %d migration file(s)\n", count)
+		return nil
 	}
+
+	// Sort keys for consistent output
+	keys := make([]string, 0, len(migrations))
+	for k := range migrations {
+		keys = append(keys, k)
+	}
+
+	// Simple sort (migrations are already timestamped)
+	for i := 0; i < len(keys)-1; i++ {
+		for j := i + 1; j < len(keys); j++ {
+			if keys[i] > keys[j] {
+				keys[i], keys[j] = keys[j], keys[i]
+			}
+		}
+	}
+
+	for _, baseName := range keys {
+		m := migrations[baseName]
+		status := ""
+		if m.hasUp && m.hasDown {
+			status = "[up/down]"
+		} else if m.hasUp {
+			status = "[up only]"
+		} else if m.hasDown {
+			status = "[down only]"
+		}
+
+		fmt.Printf("  %s %s  (%s)\n", baseName, status, m.modTime.Format("2006-01-02 15:04"))
+	}
+
+	fmt.Printf("\nTotal: %d migration(s)\n", len(migrations))
 
 	return nil
 }
