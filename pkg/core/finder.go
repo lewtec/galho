@@ -32,4 +32,5 @@ func (p *Project) FindModules(yield func(ModuleFound) bool) error {
 			}
 		}
 	}
+	return nil
 }

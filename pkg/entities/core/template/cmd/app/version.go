@@ -12,9 +12,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "show app version",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println(strings.Trim(version.Version))
-
-		//TODO: version logic
+		fmt.Println(strings.TrimSpace(version.Version))
 		return nil
 	},
 }
