@@ -24,6 +24,9 @@
     "react-dom": "^18.2.0",
     "react-relay": "^16.0.0",
     "relay-runtime": "^16.0.0",
+    "react-router-dom": "^6.20.0",
+    "i18next": "^23.7.0",
+    "react-i18next": "^13.5.0",
     "daisyui": "^3.0.0"
   },
   "peerDependencies": {

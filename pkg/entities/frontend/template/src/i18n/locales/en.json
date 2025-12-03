@@ -1,0 +1,15 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "home": {
+    "title": "Welcome to Your App",
+    "subtitle": "A modern React application with routing, internationalization, and theme support"
+  }
+}

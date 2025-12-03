@@ -1,0 +1,15 @@
+{
+  "nav": {
+    "home": "Início",
+    "about": "Sobre",
+    "contact": "Contato"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Escuro"
+  },
+  "home": {
+    "title": "Bem-vindo ao Seu App",
+    "subtitle": "Uma aplicação React moderna com roteamento, internacionalização e suporte a temas"
+  }
+}
