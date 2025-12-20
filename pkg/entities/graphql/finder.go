@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"galho/pkg/core"
+	"github.com/lewtec/galho/pkg/core"
 )
 
 func init() {

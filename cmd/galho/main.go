@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	"galho/cmd/galho/entities"
-	generate_cmd "galho/cmd/galho/generate"
-	modules_cmd "galho/cmd/galho/modules"
-	_ "galho/pkg/entities/database"
-	_ "galho/pkg/entities/frontend"
-	_ "galho/pkg/entities/graphql"
+	"github.com/lewtec/galho/cmd/galho/entities"
+	generate_cmd "github.com/lewtec/galho/cmd/galho/generate"
+	modules_cmd "github.com/lewtec/galho/cmd/galho/modules"
+	_ "github.com/lewtec/galho/pkg/entities/database"
+	_ "github.com/lewtec/galho/pkg/entities/frontend"
+	_ "github.com/lewtec/galho/pkg/entities/graphql"
 
 	"github.com/spf13/cobra"
 )

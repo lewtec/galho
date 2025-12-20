@@ -1,4 +1,4 @@
-module galho
+module github.com/lewtec/galho
 
 go 1.24.3
 
