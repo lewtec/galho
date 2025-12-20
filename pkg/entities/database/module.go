@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"galho/pkg/core"
+	"github.com/lewtec/galho/pkg/core"
 )
 
 type DatabaseModule struct {

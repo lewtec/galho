@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"galho/pkg/core"
+	"github.com/lewtec/galho/pkg/core"
 
 	"github.com/spf13/cobra"
 )

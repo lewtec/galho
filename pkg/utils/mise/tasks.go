@@ -5,11 +5,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"galho/pkg/core"
+	"github.com/lewtec/galho/pkg/core"
 	// Import entities to trigger init() and register finders
-	_ "galho/pkg/entities/database"
-	_ "galho/pkg/entities/frontend"
-	_ "galho/pkg/entities/graphql"
+	_ "github.com/lewtec/galho/pkg/entities/database"
+	_ "github.com/lewtec/galho/pkg/entities/frontend"
+	_ "github.com/lewtec/galho/pkg/entities/graphql"
 
 	toml "github.com/pelletier/go-toml/v2"
 )

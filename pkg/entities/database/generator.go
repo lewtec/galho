@@ -1,8 +1,8 @@
 package database
 
 import (
-	"galho/pkg/core"
-	"galho/pkg/utils/scaffold"
+	"github.com/lewtec/galho/pkg/core"
+	"github.com/lewtec/galho/pkg/utils/scaffold"
 
 	"github.com/spf13/cobra"
 )
