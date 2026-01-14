@@ -25,11 +25,6 @@ func InstallFS(destination string, data fs.FS) error {
 			return os.MkdirAll(destPath, 0755)
 		}
 
-		// It's a file, create parent directory if needed
-		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
-			return err
-		}
-
 		// Open source file
 		srcFile, err := data.Open(path)
 		if err != nil {
