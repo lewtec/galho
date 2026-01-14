@@ -1,6 +1,7 @@
 package scaffold
 
 import (
+	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -19,6 +20,13 @@ func InstallFS(destination string, data fs.FS) error {
 		if strings.HasSuffix(path, ".tmpl") {
 			destPath = strings.TrimSuffix(destPath, ".tmpl")
 		}
+
+		// @SECURITY: Clean the path to prevent traversal attacks
+		cleanDestPath := filepath.Clean(destPath)
+		if !strings.HasPrefix(cleanDestPath, filepath.Clean(destination)+string(os.PathSeparator)) && cleanDestPath != filepath.Clean(destination) {
+			return fmt.Errorf("path traversal attempt detected: %s", path)
+		}
+		destPath = cleanDestPath
 
 		// If it's a directory, create it
 		if d.IsDir() {
