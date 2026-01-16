@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/lewtec/galho/cmd/galho/entities"
 	generate_cmd "github.com/lewtec/galho/cmd/galho/generate"
 	modules_cmd "github.com/lewtec/galho/cmd/galho/modules"
 	_ "github.com/lewtec/galho/pkg/entities/database"
@@ -23,8 +22,6 @@ func init() {
 
 	Command.AddCommand(generate_cmd.Command)
 	Command.AddCommand(modules_cmd.Command)
-
-	entities.AddEntityCommands(Command)
 
 }
 
