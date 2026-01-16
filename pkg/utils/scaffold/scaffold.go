@@ -20,6 +20,19 @@ func InstallFS(destination string, data fs.FS) error {
 			destPath = strings.TrimSuffix(destPath, ".tmpl")
 		}
 
+		// SECURITY: Prevent path traversal attacks
+		absDest, err := filepath.Abs(destination)
+		if err != nil {
+			return err
+		}
+		absPath, err := filepath.Abs(destPath)
+		if err != nil {
+			return err
+		}
+		if !strings.HasPrefix(absPath, absDest) {
+			return fs.ErrPermission
+		}
+
 		// If it's a directory, create it
 		if d.IsDir() {
 			return os.MkdirAll(destPath, 0755)
