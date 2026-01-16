@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	generate_cmd "github.com/lewtec/galho/cmd/galho/generate"
 	_ "github.com/lewtec/galho/pkg/entities/database"
 	_ "github.com/lewtec/galho/pkg/entities/frontend"
 	_ "github.com/lewtec/galho/pkg/entities/graphql"
@@ -17,7 +18,7 @@ var Command = &cobra.Command{
 }
 
 func init() {
-
+	Command.AddCommand(generate_cmd.Command)
 }
 
 func main() {
