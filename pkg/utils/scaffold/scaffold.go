@@ -3,6 +3,7 @@ package scaffold
 import (
 	"io"
 	"io/fs"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,6 +19,19 @@ func InstallFS(destination string, data fs.FS) error {
 		destPath := filepath.Join(destination, path)
 		if strings.HasSuffix(path, ".tmpl") {
 			destPath = strings.TrimSuffix(destPath, ".tmpl")
+		}
+
+		// Security check: Prevent Zip Slip (path traversal)
+		absDest, err := filepath.Abs(destination)
+		if err != nil {
+			return err
+		}
+		absDestPath, err := filepath.Abs(destPath)
+		if err != nil {
+			return err
+		}
+		if absDestPath != absDest && !strings.HasPrefix(absDestPath, absDest+string(os.PathSeparator)) {
+			return fmt.Errorf("illegal file path: %s", destPath)
 		}
 
 		// If it's a directory, create it
