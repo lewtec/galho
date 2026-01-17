@@ -13,18 +13,16 @@ type DatabaseModule struct {
 }
 
 func NewDatabaseModule(path string) *DatabaseModule {
-	name := filepath.Base(filepath.Dir(path)) // Assuming structure internal/NAME/db/
-	if name == "db" {
-		// Fallback if path is just internal/db
-		name = "app"
-	}
-	// Try to get the parent module name
+	// Default name is the parent directory name
 	// e.g. internal/crm/db -> crm
-	// internal/auth/db -> auth
-
 	dir := filepath.Dir(path)
-	if filepath.Base(path) == "db" {
-		name = filepath.Base(dir)
+	name := filepath.Base(dir)
+
+	// Special case: if parent dir is "db" but current dir is NOT "db"
+	// e.g. internal/db/something -> app
+	// This maintains backward compatibility with previous logic
+	if filepath.Base(path) != "db" && name == "db" {
+		name = "app"
 	}
 
 	return &DatabaseModule{
