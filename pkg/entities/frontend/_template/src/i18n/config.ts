@@ -15,15 +15,13 @@ const getBrowserLanguage = (): string => {
   return resources[browserLang as keyof typeof resources] ? browserLang : 'en';
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: getBrowserLanguage(),
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false,
-    },
-  });
+i18n.use(initReactI18next).init({
+  resources,
+  lng: getBrowserLanguage(),
+  fallbackLng: 'en',
+  interpolation: {
+    escapeValue: false,
+  },
+});
 
 export default i18n;
