@@ -1,9 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
-  useEffect(() => {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     // Get theme from localStorage or detect from browser
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
 
@@ -15,10 +13,9 @@ export default function ThemeToggle() {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       initialTheme = prefersDark ? 'dark' : 'light';
     }
-
-    setTheme(initialTheme);
     document.documentElement.setAttribute('data-theme', initialTheme);
-  }, []);
+    return initialTheme;
+  });
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
@@ -32,7 +29,7 @@ export default function ThemeToggle() {
       {theme === 'light' ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
+          className="size-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -47,7 +44,7 @@ export default function ThemeToggle() {
       ) : (
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
+          className="size-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

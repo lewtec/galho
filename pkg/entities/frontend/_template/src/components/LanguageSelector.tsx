@@ -12,7 +12,7 @@ export default function LanguageSelector() {
       <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
+          className="size-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -27,7 +27,7 @@ export default function LanguageSelector() {
       </div>
       <ul
         tabIndex={0}
-        className="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-32"
+        className="menu dropdown-content bg-base-100 rounded-box z-1 mt-3 w-32 p-2 shadow-sm"
       >
         <li>
           <button onClick={() => changeLanguage('en')}>English</button>

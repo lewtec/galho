@@ -9,18 +9,14 @@ export default function Contact() {
         <h1 className="card-title text-3xl">{t('nav.contact')}</h1>
         <div className="space-y-4">
           <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
+            incididunt ut labore et dolore magna aliqua.
           </p>
           <div className="form-control">
             <label className="label">
               <span className="label-text">Email</span>
             </label>
-            <input
-              type="email"
-              placeholder="email@example.com"
-              className="input input-bordered"
-            />
+            <input type="email" placeholder="email@example.com" className="input input-bordered" />
           </div>
           <div className="form-control">
             <label className="label">
