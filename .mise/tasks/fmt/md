@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="Format Markdown"
-dprint fmt

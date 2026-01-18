@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="CI Pipeline"
-#MISE depends=["lint"]
-echo "CI checks passed"

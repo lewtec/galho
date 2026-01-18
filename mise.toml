@@ -4,6 +4,30 @@ go = "1.25.4"
 golangci-lint = "latest"
 dprint = "latest"
 
+[tasks."lint:go"]
+description = "Lint Go code"
+run = "golangci-lint run ./..."
+
+[tasks."fmt:go"]
+description = "Format Go code"
+run = "gofmt -s -w ."
+
+[tasks."lint:js"]
+description = "Lint JS/TS code"
+run = "bun run eslint ."
+
+[tasks."fmt:js"]
+description = "Format JS/TS code"
+run = "bun run prettier --write ."
+
+[tasks."lint:md"]
+description = "Lint Markdown"
+run = "dprint check"
+
+[tasks."fmt:md"]
+description = "Format Markdown"
+run = "dprint fmt"
+
 [tasks.lint]
 description = "Run all linters"
 depends = ["lint:*"]
@@ -11,3 +35,8 @@ depends = ["lint:*"]
 [tasks.fmt]
 description = "Run all formatters"
 depends = ["fmt:*"]
+
+[tasks.ci]
+description = "CI Pipeline"
+depends = ["lint"]
+run = 'echo "CI checks passed"'

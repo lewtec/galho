@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="Lint Go code"
-golangci-lint run ./...

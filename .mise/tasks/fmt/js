@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="Format JS/TS code"
-bun run prettier --write .
