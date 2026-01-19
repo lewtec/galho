@@ -1,0 +1,4 @@
+## 2026-01-19 - Path Traversal in Scaffold
+**Vulnerability:** The `InstallFS` function in `pkg/utils/scaffold` lacked validation to ensure extracted file paths remained within the intended destination directory. This could potentially allow malicious templates or file systems to write arbitrary files on the system (Zip Slip vulnerability).
+**Learning:** Even when using `io/fs` which guarantees clean paths, utility functions that join paths with a destination should explicitly verify the result stays within bounds as a defense-in-depth measure. Assumptions about input safety can be violated by custom implementations or future refactors.
+**Prevention:** Always resolve the destination directory to an absolute path and verify that the final destination path starts with this absolute path (plus a separator) before writing files.
