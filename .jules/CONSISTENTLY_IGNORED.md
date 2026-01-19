@@ -11,3 +11,11 @@ This file lists patterns of changes that have been consistently rejected by huma
 **- Files Affected:** `pkg/entities/core/_template/go.mod.tmpl` (and other `.tmpl` files)
 
 ---
+
+## IGNORE: Adding HSTS Security Header
+
+**- Pattern:** Do not add the `Strict-Transport-Security` (HSTS) header.
+**- Justification:** This change has been proposed multiple times and rejected. It is considered an operational risk for this project because it can break subdomains that do not support HTTPS.
+**- Files Affected:** Server entry points and configuration files (e.g., `src/hooks.server.ts`).
+
+---
