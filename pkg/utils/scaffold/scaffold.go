@@ -1,6 +1,7 @@
 package scaffold
 
 import (
+	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -9,15 +10,26 @@ import (
 )
 
 func InstallFS(destination string, data fs.FS) error {
+	// SECURITY: Ensure destination is absolute to prevent relative path ambiguity
+	absDest, err := filepath.Abs(destination)
+	if err != nil {
+		return err
+	}
+
 	return fs.WalkDir(data, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
 		// Calculate destination path, removing .tmpl extension if present
-		destPath := filepath.Join(destination, path)
+		destPath := filepath.Join(absDest, path)
 		if strings.HasSuffix(path, ".tmpl") {
 			destPath = strings.TrimSuffix(destPath, ".tmpl")
+		}
+
+		// SECURITY: Path Traversal Check (Zip Slip)
+		if destPath != absDest && !strings.HasPrefix(destPath, absDest+string(os.PathSeparator)) {
+			return fmt.Errorf("illegal file path: %s", destPath)
 		}
 
 		// If it's a directory, create it
