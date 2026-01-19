@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/lewtec/galho/pkg/core"
@@ -156,6 +158,11 @@ func listMigrations(module *DatabaseModule) error {
 		modTime time.Time
 	})
 
+	const (
+		suffixUp   = ".up.sql"
+		suffixDown = ".down.sql"
+	)
+
 	for _, entry := range entries {
 		if entry.IsDir() || filepath.Ext(entry.Name()) != ".sql" {
 			continue
@@ -165,15 +172,15 @@ func listMigrations(module *DatabaseModule) error {
 		var baseName string
 
 		// Remove .up.sql or .down.sql suffix to get base name
-		if len(name) > 7 && name[len(name)-7:] == ".up.sql" {
-			baseName = name[:len(name)-7]
+		if strings.HasSuffix(name, suffixUp) {
+			baseName = strings.TrimSuffix(name, suffixUp)
 			info, _ := entry.Info()
 			m := migrations[baseName]
 			m.hasUp = true
 			m.modTime = info.ModTime()
 			migrations[baseName] = m
-		} else if len(name) > 9 && name[len(name)-9:] == ".down.sql" {
-			baseName = name[:len(name)-9]
+		} else if strings.HasSuffix(name, suffixDown) {
+			baseName = strings.TrimSuffix(name, suffixDown)
 			info, _ := entry.Info()
 			m := migrations[baseName]
 			m.hasDown = true
@@ -183,7 +190,7 @@ func listMigrations(module *DatabaseModule) error {
 			migrations[baseName] = m
 		} else {
 			// Handle other .sql files (legacy format without .up/.down)
-			baseName = name[:len(name)-4]
+			baseName = strings.TrimSuffix(name, ".sql")
 			info, _ := entry.Info()
 			migrations[baseName] = struct {
 				hasUp   bool
@@ -208,13 +215,7 @@ func listMigrations(module *DatabaseModule) error {
 	}
 
 	// Simple sort (migrations are already timestamped)
-	for i := 0; i < len(keys)-1; i++ {
-		for j := i + 1; j < len(keys); j++ {
-			if keys[i] > keys[j] {
-				keys[i], keys[j] = keys[j], keys[i]
-			}
-		}
-	}
+	sort.Strings(keys)
 
 	for _, baseName := range keys {
 		m := migrations[baseName]
