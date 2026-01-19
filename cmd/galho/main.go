@@ -24,6 +24,7 @@ func init() {
 	Command.AddCommand(generate_cmd.Command)
 	Command.AddCommand(modules_cmd.Command)
 
+	generate_cmd.LoadCommands()
 	entities.AddEntityCommands(Command)
 
 }
