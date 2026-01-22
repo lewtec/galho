@@ -19,11 +19,6 @@ type FrontendModule struct {
 func NewFrontendModule(path string) *FrontendModule {
 	name := filepath.Base(filepath.Dir(path))
 
-	dir := filepath.Dir(path)
-	if filepath.Base(path) == "frontend" {
-		name = filepath.Base(dir)
-	}
-
 	return &FrontendModule{
 		path: path,
 		name: name,
