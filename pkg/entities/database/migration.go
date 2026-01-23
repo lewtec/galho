@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/lewtec/galho/pkg/core"
@@ -52,6 +53,11 @@ func newMigrationCreateCommand() *cobra.Command {
 }
 
 func createMigration(module *DatabaseModule, name string) error {
+	// Validate migration name
+	if strings.ContainsAny(name, "/\\") || strings.Contains(name, "..") {
+		return fmt.Errorf("invalid migration name: %s", name)
+	}
+
 	// Generate migration filename with timestamp
 	timestamp := time.Now().Format("20060102150405")
 	filenameUp := fmt.Sprintf("%s_%s.up.sql", timestamp, name)
