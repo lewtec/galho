@@ -106,18 +106,6 @@ func moduleMatchesName(m Module, name string) bool {
 	// e.g., "internal/crm/db" matches "crm"
 	path := m.Path()
 
-	// Try matching the parent directory name (e.g., "crm" in "internal/crm/db")
-	parentDir := filepath.Base(filepath.Dir(path))
-	if parentDir == name {
-		return true
-	}
-
-	// Try matching the directory name itself
-	dirName := filepath.Base(path)
-	if dirName == name {
-		return true
-	}
-
 	// Try matching against any path component
 	parts := strings.Split(filepath.ToSlash(path), "/")
 	for _, part := range parts {
