@@ -2,31 +2,19 @@ package frontend
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/lewtec/galho/pkg/core"
 )
 
 type FrontendModule struct {
-	path string
-	name string
-	// In a real implementation, we might need to find the related GraphQL schema
-	// for Relay compilation. For now, I'll assume a convention or a flag.
-	// Based on the spec: --schema ./internal/crm/api/schema.graphql
-	// This implies we might need to look for other modules or configuration.
+	core.BaseModule
 }
 
 func NewFrontendModule(path string) *FrontendModule {
-	name := filepath.Base(filepath.Dir(path))
-
-	dir := filepath.Dir(path)
-	if filepath.Base(path) == "frontend" {
-		name = filepath.Base(dir)
-	}
+	name := core.DeriveModuleName(path)
 
 	return &FrontendModule{
-		path: path,
-		name: name,
+		BaseModule: core.NewBaseModule(path, name),
 	}
 }
 
@@ -34,16 +22,8 @@ func (m *FrontendModule) Type() string {
 	return "frontend"
 }
 
-func (m *FrontendModule) Path() string {
-	return m.path
-}
-
-func (m *FrontendModule) Name() string {
-	return m.name
-}
-
 func (m *FrontendModule) GenerateTasks() ([]core.Task, error) {
-	taskName := fmt.Sprintf("gen:%s:frontend:relay", m.name)
+	taskName := fmt.Sprintf("gen:%s:frontend:relay", m.Name())
 
 	// TODO: Smarter schema detection.
 	// For now, I will use a placeholder or look for a sibling 'api' directory.
@@ -54,9 +34,9 @@ func (m *FrontendModule) GenerateTasks() ([]core.Task, error) {
 	return []core.Task{
 		{
 			Name:        taskName,
-			Description: fmt.Sprintf("Generate Relay code for %s", m.name),
+			Description: fmt.Sprintf("Generate Relay code for %s", m.Name()),
 			Run:         runCmd,
-			Dir:         m.path,
+			Dir:         m.Path(),
 		},
 	}, nil
 }
