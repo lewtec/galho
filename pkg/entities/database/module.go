@@ -8,28 +8,21 @@ import (
 )
 
 type DatabaseModule struct {
-	path string
-	name string
+	core.BaseModule
 }
 
 func NewDatabaseModule(path string) *DatabaseModule {
-	name := filepath.Base(filepath.Dir(path)) // Assuming structure internal/NAME/db/
-	if name == "db" {
-		// Fallback if path is just internal/db
-		name = "app"
-	}
-	// Try to get the parent module name
-	// e.g. internal/crm/db -> crm
-	// internal/auth/db -> auth
+	name := core.DeriveModuleName(path)
 
-	dir := filepath.Dir(path)
-	if filepath.Base(path) == "db" {
-		name = filepath.Base(dir)
+	// Fallback if path is just internal/db (parent is internal, but name derived as internal?)
+	// Original logic: if name == "db" { name = "app" }
+	// This applies when parent dir is "db".
+	if name == "db" && filepath.Base(path) != "db" {
+		name = "app"
 	}
 
 	return &DatabaseModule{
-		path: path,
-		name: name,
+		BaseModule: core.NewBaseModule(path, name),
 	}
 }
 
@@ -37,23 +30,15 @@ func (m *DatabaseModule) Type() string {
 	return "database"
 }
 
-func (m *DatabaseModule) Path() string {
-	return m.path
-}
-
-func (m *DatabaseModule) Name() string {
-	return m.name
-}
-
 func (m *DatabaseModule) GenerateTasks() ([]core.Task, error) {
-	taskName := fmt.Sprintf("gen:%s:db:sqlc", m.name)
+	taskName := fmt.Sprintf("gen:%s:db:sqlc", m.Name())
 
 	return []core.Task{
 		{
 			Name:        taskName,
-			Description: fmt.Sprintf("Generate SQLC code for %s", m.name),
+			Description: fmt.Sprintf("Generate SQLC code for %s", m.Name()),
 			Run:         "sqlc generate -f sqlc.yaml",
-			Dir:         m.path,
+			Dir:         m.Path(),
 		},
 	}, nil
 }
