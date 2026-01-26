@@ -19,6 +19,12 @@ func GetProject() (*Project, error) {
 	return &Project{projectRoot}, nil
 }
 
+// NewProject creates a new project instance with the given directory.
+// This is primarily used for testing or when the project directory is already known.
+func NewProject(dir string) *Project {
+	return &Project{dir: dir}
+}
+
 func (p *Project) Dir() string {
 	return p.dir
 }

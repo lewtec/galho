@@ -32,9 +32,41 @@ func GenerateTasksToml(projectRoot string) error {
 		return err
 	}
 
+	config, err := CollectTasks(project)
+	if err != nil {
+		return err
+	}
+
+	miseDir := filepath.Join(projectRoot, ".mise")
+	if err := os.MkdirAll(miseDir, 0755); err != nil {
+		return err
+	}
+
+	outputPath := filepath.Join(miseDir, "galho.toml")
+
+	f, err := os.Create(outputPath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	encoder := toml.NewEncoder(f)
+	// Mise often prefers multiline strings for 'run' if they are long, but standard toml encoder
+	// might handle it its own way. go-toml v2 is compliant.
+	if err := encoder.Encode(config); err != nil {
+		return err
+	}
+
+	fmt.Printf("Mise tasks generated at %s\n", outputPath)
+	return nil
+}
+
+// CollectTasks iterates over all modules in the project and gathers their tasks.
+// It normalizes task directories to be relative to the project root.
+func CollectTasks(project *core.Project) (map[string]MiseTask, error) {
 	config := make(map[string]MiseTask)
 
-	err = project.FindModules(func(found core.ModuleFound) bool {
+	err := project.FindModules(func(found core.ModuleFound) bool {
 		tasks, err := found.Module.GenerateTasks()
 		if err != nil {
 			// Log error but continue processing other modules
@@ -63,7 +95,7 @@ func GenerateTasksToml(projectRoot string) error {
 	})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Add gen:all task
@@ -72,26 +104,5 @@ func GenerateTasksToml(projectRoot string) error {
 		Depends:     []string{"gen:*"},
 	}
 
-	miseDir := filepath.Join(projectRoot, ".mise")
-	if err := os.MkdirAll(miseDir, 0755); err != nil {
-		return err
-	}
-
-	outputPath := filepath.Join(miseDir, "galho.toml")
-
-	f, err := os.Create(outputPath)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	encoder := toml.NewEncoder(f)
-	// Mise often prefers multiline strings for 'run' if they are long, but standard toml encoder
-	// might handle it its own way. go-toml v2 is compliant.
-	if err := encoder.Encode(config); err != nil {
-		return err
-	}
-
-	fmt.Printf("Mise tasks generated at %s\n", outputPath)
-	return nil
+	return config, nil
 }
