@@ -20,12 +20,13 @@ var Command = &cobra.Command{
 }
 
 func init() {
+	generate_cmd.LoadCommands()
+	modules_cmd.LoadCommands()
 
 	Command.AddCommand(generate_cmd.Command)
 	Command.AddCommand(modules_cmd.Command)
 
 	entities.AddEntityCommands(Command)
-
 }
 
 func main() {

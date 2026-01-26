@@ -1,0 +1,10 @@
+dist/
+bin/
+node_modules/
+.git/
+*.go
+go.sum
+make_release
+version.txt
+LICENSE
+.mise/
