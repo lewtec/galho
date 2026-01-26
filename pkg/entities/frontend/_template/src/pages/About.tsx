@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 export default function About() {
   const { t } = useTranslation();
@@ -6,7 +6,7 @@ export default function About() {
   return (
     <div className="card bg-base-100 shadow-xl">
       <div className="card-body">
-        <h1 className="card-title text-3xl">{t('nav.about')}</h1>
+        <h1 className="card-title text-3xl">{t("nav.about")}</h1>
         <div className="space-y-4">
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do

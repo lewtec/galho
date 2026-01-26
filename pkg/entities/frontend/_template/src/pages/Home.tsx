@@ -1,6 +1,6 @@
-import { Suspense } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useLazyLoadQuery, graphql } from 'react-relay';
+import { Suspense } from "react";
+import { useTranslation } from "react-i18next";
+import { useLazyLoadQuery, graphql } from "react-relay";
 
 // This query will be compiled by relay-compiler
 // Make sure your GraphQL schema has a 'viewer' query or adjust accordingly
@@ -23,8 +23,8 @@ function HomeContent() {
       <div className="hero bg-base-100 rounded-lg shadow-xl">
         <div className="hero-content text-center py-16">
           <div className="max-w-md">
-            <h1 className="text-5xl font-bold">{t('home.title')}</h1>
-            <p className="py-6">{t('home.subtitle')}</p>
+            <h1 className="text-5xl font-bold">{t("home.title")}</h1>
+            <p className="py-6">{t("home.subtitle")}</p>
             <button className="btn btn-primary">Get Started</button>
           </div>
         </div>
@@ -83,7 +83,9 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <Suspense fallback={<div className="loading loading-spinner loading-lg"></div>}>
+    <Suspense
+      fallback={<div className="loading loading-spinner loading-lg"></div>}
+    >
       <HomeContent />
     </Suspense>
   );

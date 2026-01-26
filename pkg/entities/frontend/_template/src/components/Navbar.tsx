@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import ThemeToggle from './ThemeToggle';
-import LanguageSelector from './LanguageSelector';
+import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import ThemeToggle from "./ThemeToggle";
+import LanguageSelector from "./LanguageSelector";
 
 export default function Navbar() {
   const { t } = useTranslation();
@@ -31,13 +31,13 @@ export default function Navbar() {
             className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
           >
             <li>
-              <Link to="/">{t('nav.home')}</Link>
+              <Link to="/">{t("nav.home")}</Link>
             </li>
             <li>
-              <Link to="/about">{t('nav.about')}</Link>
+              <Link to="/about">{t("nav.about")}</Link>
             </li>
             <li>
-              <Link to="/contact">{t('nav.contact')}</Link>
+              <Link to="/contact">{t("nav.contact")}</Link>
             </li>
           </ul>
         </div>
@@ -49,13 +49,13 @@ export default function Navbar() {
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">
           <li>
-            <Link to="/">{t('nav.home')}</Link>
+            <Link to="/">{t("nav.home")}</Link>
           </li>
           <li>
-            <Link to="/about">{t('nav.about')}</Link>
+            <Link to="/about">{t("nav.about")}</Link>
           </li>
           <li>
-            <Link to="/contact">{t('nav.contact')}</Link>
+            <Link to="/contact">{t("nav.contact")}</Link>
           </li>
         </ul>
       </div>

@@ -4,15 +4,15 @@ import {
   RecordSource,
   Store,
   FetchFunction,
-} from 'relay-runtime';
+} from "relay-runtime";
 
-const HTTP_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT || '/graphql';
+const HTTP_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT || "/graphql";
 
 const fetchFn: FetchFunction = async (request, variables) => {
   const response = await fetch(HTTP_ENDPOINT, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       query: request.text,
@@ -25,7 +25,7 @@ const fetchFn: FetchFunction = async (request, variables) => {
   if (Array.isArray(json.errors)) {
     console.error(json.errors);
     throw new Error(
-      `Error fetching GraphQL query '${request.name}' with variables '${JSON.stringify(variables)}': ${JSON.stringify(json.errors)}`
+      `Error fetching GraphQL query '${request.name}' with variables '${JSON.stringify(variables)}': ${JSON.stringify(json.errors)}`,
     );
   }
 
