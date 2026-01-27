@@ -2,8 +2,6 @@ package core
 
 import (
 	"fmt"
-	"path/filepath"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -61,70 +59,15 @@ func resolveModule(cmd *cobra.Command, entityType string) (*CommandContext, erro
 		return nil, fmt.Errorf("failed to find modules: %w", err)
 	}
 
-	if len(modules) == 0 {
-		return nil, fmt.Errorf("no %s modules found in project", entityType)
-	}
-
-	// Select module
-	var selectedModule Module
-	if moduleName != "" {
-		// Find module by name
-		selectedModule = findModuleByName(modules, moduleName)
-		if selectedModule == nil {
-			return nil, fmt.Errorf("module %s not found", moduleName)
-		}
-	} else if len(modules) == 1 {
-		// Auto-select if only one module
-		selectedModule = modules[0]
-		fmt.Printf("Auto-selected module: %s\n", selectedModule.Path())
-	} else {
-		// Interactive selection
-		selectedModule, err = selectModuleInteractive(modules, entityType)
-		if err != nil {
-			return nil, err
-		}
+	// Select module using strategy
+	selector := &StandardSelector{}
+	selectedModule, err := selector.Select(modules, entityType, moduleName)
+	if err != nil {
+		return nil, err
 	}
 
 	return &CommandContext{
 		Project: project,
 		Module:  selectedModule,
 	}, nil
-}
-
-func findModuleByName(modules []Module, name string) Module {
-	for _, m := range modules {
-		// Match against path components
-		if moduleMatchesName(m, name) {
-			return m
-		}
-	}
-	return nil
-}
-
-func moduleMatchesName(m Module, name string) bool {
-	// Implementation: check if module path contains name
-	// e.g., "internal/crm/db" matches "crm"
-	path := m.Path()
-
-	// Try matching the parent directory name (e.g., "crm" in "internal/crm/db")
-	parentDir := filepath.Base(filepath.Dir(path))
-	if parentDir == name {
-		return true
-	}
-
-	// Try matching the directory name itself
-	dirName := filepath.Base(path)
-	if dirName == name {
-		return true
-	}
-
-	// Try matching against any path component
-	parts := strings.Split(filepath.ToSlash(path), "/")
-	for _, part := range parts {
-		if part == name {
-			return true
-		}
-	}
-
-	return false
 }
