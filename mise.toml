@@ -1,3 +1,15 @@
 [tools]
 bun = "1.3.3"
-go = "1.25.4"
+go = "1.24.3"
+
+[tasks]
+install = "bun install && go mod download"
+"lint:go" = "go vet ./..."
+"lint:eslint" = "bun x eslint ."
+lint = { depends = ["lint:*"] }
+"fmt:go" = "go fmt ./..."
+"fmt:prettier" = "bun x prettier --write ."
+fmt = { depends = ["fmt:*"] }
+test = "go test -v ./pkg/..."
+codegen = 'echo "No codegen defined"'
+ci = { depends = ["lint", "test"] }

@@ -10,6 +10,10 @@ type Project struct {
 	dir string
 }
 
+func NewProject(dir string) *Project {
+	return &Project{dir: dir}
+}
+
 func GetProject() (*Project, error) {
 	dotgalho, err := findup.Find(".galho")
 	if err != nil {

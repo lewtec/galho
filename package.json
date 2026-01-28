@@ -1,0 +1,13 @@
+{
+  "name": "galho-root",
+  "private": true,
+  "devDependencies": {
+    "@types/node": "^20.12.7",
+    "eslint": "^9.1.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^7.7.0",
+    "eslint-plugin-better-tailwindcss": "^3.0.1",
+    "eslint-plugin-react": "^7.34.1"
+  }
+}
