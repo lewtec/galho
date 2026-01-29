@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/lewtec/galho/cmd/galho/entities"
-	generate_cmd "github.com/lewtec/galho/cmd/galho/generate"
-	modules_cmd "github.com/lewtec/galho/cmd/galho/modules"
+	"github.com/lewtec/galho/pkg/core"
 	_ "github.com/lewtec/galho/pkg/entities/database"
 	_ "github.com/lewtec/galho/pkg/entities/frontend"
 	_ "github.com/lewtec/galho/pkg/entities/graphql"
@@ -20,12 +18,38 @@ var Command = &cobra.Command{
 }
 
 func init() {
+	// Register Generate Command
+	generateCmd := &cobra.Command{
+		Use:   "generate",
+		Short: "Generate code for entities",
+	}
+	for name, cmd := range core.GetGenerateCommands() {
+		cmd.Use = name
+		generateCmd.AddCommand(cmd)
+	}
+	Command.AddCommand(generateCmd)
 
-	Command.AddCommand(generate_cmd.Command)
-	Command.AddCommand(modules_cmd.Command)
+	// Register Modules Command
+	modulesCmd := &cobra.Command{
+		Use:   "modules",
+		Short: "List modules in the project",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			project, err := core.GetProject()
+			if err != nil {
+				return err
+			}
+			return project.FindModules(func(m core.ModuleFound) bool {
+				fmt.Printf("[%s] %s (%s)\n", m.Finder, m.Module.Name(), m.Module.Path())
+				return true
+			})
+		},
+	}
+	Command.AddCommand(modulesCmd)
 
-	entities.AddEntityCommands(Command)
-
+	// Register Entity Commands
+	for _, config := range core.GetEntityCommands() {
+		Command.AddCommand(config.Command)
+	}
 }
 
 func main() {

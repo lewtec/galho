@@ -1,11 +1,11 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { RelayEnvironmentProvider } from 'react-relay';
-import { RelayEnvironment } from './RelayEnvironment';
-import Layout from './components/Layout';
-import Home from './pages/Home';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import './i18n/config';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { RelayEnvironmentProvider } from "react-relay";
+import { RelayEnvironment } from "./RelayEnvironment";
+import Layout from "./components/Layout";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import "./i18n/config";
 
 export default function App() {
   return (

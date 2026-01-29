@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 export default function Contact() {
   const { t } = useTranslation();
@@ -6,7 +6,7 @@ export default function Contact() {
   return (
     <div className="card bg-base-100 shadow-xl">
       <div className="card-body">
-        <h1 className="card-title text-3xl">{t('nav.contact')}</h1>
+        <h1 className="card-title text-3xl">{t("nav.contact")}</h1>
         <div className="space-y-4">
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
