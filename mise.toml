@@ -1,3 +1,24 @@
 [tools]
 bun = "1.3.3"
 go = "1.25.4"
+
+[tasks]
+"lint:go" = "go vet ./..."
+"lint:eslint" = "bun x eslint ."
+lint = { depends = ["lint:*"] }
+
+"fmt:go" = "go fmt ./..."
+"fmt:prettier" = "bun x prettier --write ."
+fmt = { depends = ["fmt:*"] }
+
+"test:go" = "go test -v ./..."
+test = { depends = ["test:*"] }
+
+"codegen:go" = "go generate ./..."
+codegen = { depends = ["codegen:*"] }
+
+"install:go" = "go mod download"
+"install:bun" = "bun install"
+install = { depends = ["install:*"] }
+
+ci = { depends = ["lint", "test"] }

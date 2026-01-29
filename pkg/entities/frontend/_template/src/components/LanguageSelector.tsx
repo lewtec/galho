@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 export default function LanguageSelector() {
   const { i18n } = useTranslation();
@@ -30,10 +30,10 @@ export default function LanguageSelector() {
         className="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-32"
       >
         <li>
-          <button onClick={() => changeLanguage('en')}>English</button>
+          <button onClick={() => changeLanguage("en")}>English</button>
         </li>
         <li>
-          <button onClick={() => changeLanguage('pt')}>Português</button>
+          <button onClick={() => changeLanguage("pt")}>Português</button>
         </li>
       </ul>
     </div>

@@ -1,35 +1,37 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     // Get theme from localStorage or detect from browser
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
 
-    let initialTheme: 'light' | 'dark';
+    let initialTheme: "light" | "dark";
     if (savedTheme) {
       initialTheme = savedTheme;
     } else {
       // Detect browser's preferred color scheme
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      initialTheme = prefersDark ? 'dark' : 'light';
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      initialTheme = prefersDark ? "dark" : "light";
     }
 
     setTheme(initialTheme);
-    document.documentElement.setAttribute('data-theme', initialTheme);
+    document.documentElement.setAttribute("data-theme", initialTheme);
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
+    const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.setAttribute("data-theme", newTheme);
   };
 
   return (
     <button onClick={toggleTheme} className="btn btn-ghost btn-circle">
-      {theme === 'light' ? (
+      {theme === "light" ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-5 w-5"
