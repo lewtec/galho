@@ -5,6 +5,7 @@ import {
   Store,
   FetchFunction,
 } from 'relay-runtime';
+import { reportError } from './utils/reportError';
 
 const HTTP_ENDPOINT = import.meta.env.VITE_GRAPHQL_ENDPOINT || '/graphql';
 
@@ -23,7 +24,7 @@ const fetchFn: FetchFunction = async (request, variables) => {
   const json = await response.json();
 
   if (Array.isArray(json.errors)) {
-    console.error(json.errors);
+    reportError(json.errors, { requestName: request.name, variables });
     throw new Error(
       `Error fetching GraphQL query '${request.name}' with variables '${JSON.stringify(variables)}': ${JSON.stringify(json.errors)}`
     );
