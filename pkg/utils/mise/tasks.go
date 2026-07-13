@@ -21,38 +21,40 @@ type MiseTask struct {
 	Dir         string   `toml:"dir,omitempty"`
 }
 
+// MiseConfig is the root shape of .mise/galho.toml (mise [tasks.*] tables).
 type MiseConfig struct {
 	Tasks map[string]MiseTask `toml:"tasks"`
 }
 
-// GenerateTasksToml scans the project and generates the .mise/tasks.toml file.
+// GenerateTasksToml scans the project and writes .mise/galho.toml under projectRoot.
+// If projectRoot is empty, the discovered project directory is used.
 func GenerateTasksToml(projectRoot string) error {
 	project, err := core.GetProject()
 	if err != nil {
 		return err
 	}
+	if projectRoot == "" {
+		projectRoot = project.Dir()
+	}
 
-	config := make(map[string]MiseTask)
+	tasks := make(map[string]MiseTask)
 
 	err = project.FindModules(func(found core.ModuleFound) bool {
-		tasks, err := found.Module.GenerateTasks()
+		moduleTasks, err := found.Module.GenerateTasks()
 		if err != nil {
-			// Log error but continue processing other modules
 			fmt.Printf("Error generating tasks for module %s: %v\n", found.Module.Path(), err)
 			return true
 		}
 
-		for _, task := range tasks {
-			// Convert task.Dir to relative path if it's absolute
+		for _, task := range moduleTasks {
 			taskDir := task.Dir
 			if filepath.IsAbs(taskDir) {
-				relDir, err := filepath.Rel(project.Dir(), taskDir)
-				if err == nil {
+				if relDir, err := filepath.Rel(project.Dir(), taskDir); err == nil {
 					taskDir = relDir
 				}
 			}
 
-			config[task.Name] = MiseTask{
+			tasks[task.Name] = MiseTask{
 				Description: task.Description,
 				Run:         task.Run,
 				Depends:     task.Depends,
@@ -61,13 +63,11 @@ func GenerateTasksToml(projectRoot string) error {
 		}
 		return true
 	})
-
 	if err != nil {
 		return err
 	}
 
-	// Add gen:all task
-	config["gen"] = MiseTask{
+	tasks["gen"] = MiseTask{
 		Description: "Generate all code",
 		Depends:     []string{"gen:*"},
 	}
@@ -78,17 +78,14 @@ func GenerateTasksToml(projectRoot string) error {
 	}
 
 	outputPath := filepath.Join(miseDir, "galho.toml")
-
 	f, err := os.Create(outputPath)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	encoder := toml.NewEncoder(f)
-	// Mise often prefers multiline strings for 'run' if they are long, but standard toml encoder
-	// might handle it its own way. go-toml v2 is compliant.
-	if err := encoder.Encode(config); err != nil {
+	// Encode under the "tasks" table so mise sees [tasks."name"] entries.
+	if err := toml.NewEncoder(f).Encode(MiseConfig{Tasks: tasks}); err != nil {
 		return err
 	}
 
