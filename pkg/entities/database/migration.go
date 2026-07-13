@@ -2,8 +2,10 @@ package database
 
 import (
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"time"
 
 	"github.com/lewtec/galho/pkg/core"
@@ -202,19 +204,7 @@ func listMigrations(module *DatabaseModule) error {
 	}
 
 	// Sort keys for consistent output
-	keys := make([]string, 0, len(migrations))
-	for k := range migrations {
-		keys = append(keys, k)
-	}
-
-	// Simple sort (migrations are already timestamped)
-	for i := 0; i < len(keys)-1; i++ {
-		for j := i + 1; j < len(keys); j++ {
-			if keys[i] > keys[j] {
-				keys[i], keys[j] = keys[j], keys[i]
-			}
-		}
-	}
+	keys := slices.Sorted(maps.Keys(migrations))
 
 	for _, baseName := range keys {
 		m := migrations[baseName]
