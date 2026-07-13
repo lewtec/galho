@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/lewtec/galho/pkg/core"
@@ -33,7 +34,6 @@ func newMigrationCreateCommand() *cobra.Command {
 		Long:  "Create a new timestamped migration file in the migrations directory",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// Get command context
 			ctx, err := core.GetCommandContext(cmd)
 			if err != nil {
 				return err
@@ -41,37 +41,30 @@ func newMigrationCreateCommand() *cobra.Command {
 
 			migrationName := args[0]
 
-			// Get database module
 			dbModule, ok := ctx.Module.(*DatabaseModule)
 			if !ok {
 				return fmt.Errorf("expected database module, got %s", ctx.Module.Type())
 			}
 
-			// Create migration
 			return createMigration(dbModule, migrationName)
 		},
 	}
 }
 
 func createMigration(module *DatabaseModule, name string) error {
-	// Generate migration filename with timestamp
 	timestamp := time.Now().Format("20060102150405")
 	filenameUp := fmt.Sprintf("%s_%s.up.sql", timestamp, name)
 	filenameDown := fmt.Sprintf("%s_%s.down.sql", timestamp, name)
 
-	// Create migrations directory path
 	migrationsDir := filepath.Join(module.Path(), "migrations")
 
-	// Ensure migrations directory exists
 	if err := os.MkdirAll(migrationsDir, 0755); err != nil {
 		return fmt.Errorf("failed to create migrations directory: %w", err)
 	}
 
-	// Full paths to migration files
 	filepathUp := filepath.Join(migrationsDir, filenameUp)
 	filepathDown := filepath.Join(migrationsDir, filenameDown)
 
-	// Migration template for "up" file
 	templateUp := fmt.Sprintf(`-- Migration: %s (up)
 -- Created: %s
 
@@ -86,7 +79,6 @@ func createMigration(module *DatabaseModule, name string) error {
 -- );
 `, name, time.Now().Format("2006-01-02 15:04:05"))
 
-	// Migration template for "down" file
 	templateDown := fmt.Sprintf(`-- Migration: %s (down)
 -- Created: %s
 
@@ -97,12 +89,10 @@ func createMigration(module *DatabaseModule, name string) error {
 -- DROP TABLE IF EXISTS example;
 `, name, time.Now().Format("2006-01-02 15:04:05"))
 
-	// Write "up" migration file
 	if err := os.WriteFile(filepathUp, []byte(templateUp), 0644); err != nil {
 		return fmt.Errorf("failed to write up migration file: %w", err)
 	}
 
-	// Write "down" migration file
 	if err := os.WriteFile(filepathDown, []byte(templateDown), 0644); err != nil {
 		return fmt.Errorf("failed to write down migration file: %w", err)
 	}
@@ -120,28 +110,30 @@ func newMigrationListCommand() *cobra.Command {
 		Short: "List all migrations",
 		Long:  "List all migration files in the migrations directory",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// Get command context
 			ctx, err := core.GetCommandContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			// Get database module
 			dbModule, ok := ctx.Module.(*DatabaseModule)
 			if !ok {
 				return fmt.Errorf("expected database module, got %s", ctx.Module.Type())
 			}
 
-			// List migrations
 			return listMigrations(dbModule)
 		},
 	}
 }
 
+type migrationEntry struct {
+	hasUp   bool
+	hasDown bool
+	modTime time.Time
+}
+
 func listMigrations(module *DatabaseModule) error {
 	migrationsDir := filepath.Join(module.Path(), "migrations")
 
-	// Read migrations directory
 	entries, err := os.ReadDir(migrationsDir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -151,12 +143,7 @@ func listMigrations(module *DatabaseModule) error {
 		return fmt.Errorf("failed to read migrations: %w", err)
 	}
 
-	// Group migrations by base name (removing .up/.down suffix)
-	migrations := make(map[string]struct {
-		hasUp   bool
-		hasDown bool
-		modTime time.Time
-	})
+	migrations := make(map[string]migrationEntry)
 
 	for _, entry := range entries {
 		if entry.IsDir() || filepath.Ext(entry.Name()) != ".sql" {
@@ -164,38 +151,39 @@ func listMigrations(module *DatabaseModule) error {
 		}
 
 		name := entry.Name()
-		var baseName string
-
-		// Remove .up.sql or .down.sql suffix to get base name
-		if len(name) > 7 && name[len(name)-7:] == ".up.sql" {
-			baseName = name[:len(name)-7]
-			info, _ := entry.Info()
-			m := migrations[baseName]
-			m.hasUp = true
-			m.modTime = info.ModTime()
-			migrations[baseName] = m
-		} else if len(name) > 9 && name[len(name)-9:] == ".down.sql" {
-			baseName = name[:len(name)-9]
-			info, _ := entry.Info()
-			m := migrations[baseName]
-			m.hasDown = true
-			if m.modTime.IsZero() || info.ModTime().After(m.modTime) {
-				m.modTime = info.ModTime()
-			}
-			migrations[baseName] = m
-		} else {
-			// Handle other .sql files (legacy format without .up/.down)
-			baseName = name[:len(name)-4]
-			info, _ := entry.Info()
-			migrations[baseName] = struct {
-				hasUp   bool
-				hasDown bool
-				modTime time.Time
-			}{hasUp: true, hasDown: false, modTime: info.ModTime()}
+		info, err := entry.Info()
+		if err != nil {
+			return fmt.Errorf("failed to stat migration %s: %w", name, err)
 		}
+
+		var baseName string
+		var isUp, isDown bool
+		switch {
+		case strings.HasSuffix(name, ".up.sql"):
+			baseName = strings.TrimSuffix(name, ".up.sql")
+			isUp = true
+		case strings.HasSuffix(name, ".down.sql"):
+			baseName = strings.TrimSuffix(name, ".down.sql")
+			isDown = true
+		default:
+			// Legacy single-file format without .up/.down
+			baseName = strings.TrimSuffix(name, ".sql")
+			isUp = true
+		}
+
+		m := migrations[baseName]
+		if isUp {
+			m.hasUp = true
+		}
+		if isDown {
+			m.hasDown = true
+		}
+		if m.modTime.IsZero() || info.ModTime().After(m.modTime) {
+			m.modTime = info.ModTime()
+		}
+		migrations[baseName] = m
 	}
 
-	// Display migrations
 	fmt.Printf("Migrations in %s:\n\n", module.Name())
 
 	if len(migrations) == 0 {
@@ -203,17 +191,17 @@ func listMigrations(module *DatabaseModule) error {
 		return nil
 	}
 
-	// Sort keys for consistent output
 	keys := slices.Sorted(maps.Keys(migrations))
 
 	for _, baseName := range keys {
 		m := migrations[baseName]
 		status := ""
-		if m.hasUp && m.hasDown {
+		switch {
+		case m.hasUp && m.hasDown:
 			status = "[up/down]"
-		} else if m.hasUp {
+		case m.hasUp:
 			status = "[up only]"
-		} else if m.hasDown {
+		case m.hasDown:
 			status = "[down only]"
 		}
 
