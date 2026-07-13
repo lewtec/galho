@@ -1,6 +1,10 @@
 package core
 
-import "fmt"
+import (
+	"fmt"
+	"maps"
+	"slices"
+)
 
 var moduleFinders = make(map[string]func(*Project) ([]Module, error))
 
@@ -17,7 +21,9 @@ func RegisterModuleFinder(name string, t func(*Project) ([]Module, error)) {
 }
 
 func (p *Project) FindModules(yield func(ModuleFound) bool) error {
-	for k, v := range moduleFinders {
+	// Stable order so module listing and task generation are deterministic.
+	for _, k := range slices.Sorted(maps.Keys(moduleFinders)) {
+		v := moduleFinders[k]
 		modules, err := v(p)
 		if err != nil {
 			return fmt.Errorf("on finding modules with finder %s: %w", k, err)
