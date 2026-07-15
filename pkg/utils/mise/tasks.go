@@ -12,7 +12,19 @@ import (
 	_ "github.com/lewtec/galho/pkg/entities/graphql"
 
 	toml "github.com/pelletier/go-toml/v2"
+	"github.com/spf13/cobra"
 )
+
+func init() {
+	core.RegisterGenerateCommand("tasks", &cobra.Command{
+		Use:   "tasks",
+		Short: "Generate mise tasks from project modules",
+		Long:  "Scan discovered modules and write .mise/galho.toml with generation tasks",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return GenerateTasksToml("")
+		},
+	})
+}
 
 type MiseTask struct {
 	Description string   `toml:"description,omitempty"`

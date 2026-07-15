@@ -8,6 +8,8 @@ import (
 	_ "github.com/lewtec/galho/pkg/entities/database"
 	_ "github.com/lewtec/galho/pkg/entities/frontend"
 	_ "github.com/lewtec/galho/pkg/entities/graphql"
+	// Registers `generate tasks` (mise.GenerateTasksToml).
+	_ "github.com/lewtec/galho/pkg/utils/mise"
 
 	"github.com/spf13/cobra"
 )
