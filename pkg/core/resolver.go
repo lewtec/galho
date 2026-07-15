@@ -102,23 +102,25 @@ func findModuleByName(modules []Module, name string) Module {
 }
 
 func moduleMatchesName(m Module, name string) bool {
-	// Implementation: check if module path contains name
-	// e.g., "internal/crm/db" matches "crm"
+	// Prefer the friendly module name used in listings and task ids
+	// (e.g. DatabaseModule names "crm" from internal/crm/db).
+	if m.Name() == name {
+		return true
+	}
+
+	// Path-based fallbacks: "internal/crm/db" matches "crm" or "db".
 	path := m.Path()
 
-	// Try matching the parent directory name (e.g., "crm" in "internal/crm/db")
 	parentDir := filepath.Base(filepath.Dir(path))
 	if parentDir == name {
 		return true
 	}
 
-	// Try matching the directory name itself
 	dirName := filepath.Base(path)
 	if dirName == name {
 		return true
 	}
 
-	// Try matching against any path component
 	parts := strings.Split(filepath.ToSlash(path), "/")
 	for _, part := range parts {
 		if part == name {
