@@ -26,7 +26,9 @@ const fetchFn: FetchFunction = async (request, variables) => {
   if (Array.isArray(json.errors)) {
     reportError(json.errors, { requestName: request.name, variables });
     throw new Error(
-      `Error fetching GraphQL query '${request.name}' with variables '${JSON.stringify(variables)}': ${JSON.stringify(json.errors)}`
+      `Error fetching GraphQL query '${request.name}' ` +
+      `with variables '${JSON.stringify(variables)}': ` +
+      `${JSON.stringify(json.errors)}`
     );
   }
 
