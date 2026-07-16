@@ -2,6 +2,8 @@ package core
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 
 	"github.com/spf13/cobra"
 )
@@ -31,7 +33,12 @@ func RegisterEntityCommand(config EntityCommand) {
 	entityCommands[config.Name] = &config
 }
 
-// GetEntityCommands returns all registered entity commands
-func GetEntityCommands() map[string]*EntityCommand {
-	return entityCommands
+// GetEntityCommands returns registered entity commands ordered by short name.
+func GetEntityCommands() []*EntityCommand {
+	names := slices.Sorted(maps.Keys(entityCommands))
+	out := make([]*EntityCommand, 0, len(names))
+	for _, name := range names {
+		out = append(out, entityCommands[name])
+	}
+	return out
 }
