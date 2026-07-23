@@ -68,10 +68,9 @@ func resolveModule(cmd *cobra.Command, entityType string) (*CommandContext, erro
 	// Select module
 	var selectedModule Module
 	if moduleName != "" {
-		// Find module by name
-		selectedModule = findModuleByName(modules, moduleName)
-		if selectedModule == nil {
-			return nil, fmt.Errorf("module %s not found", moduleName)
+		selectedModule, err = findModuleByName(modules, moduleName)
+		if err != nil {
+			return nil, err
 		}
 	} else if len(modules) == 1 {
 		// Auto-select if only one module
@@ -91,14 +90,43 @@ func resolveModule(cmd *cobra.Command, entityType string) (*CommandContext, erro
 	}, nil
 }
 
-func findModuleByName(modules []Module, name string) Module {
+// findModuleByName resolves --module against discovered modules.
+// Prefer a unique Module.Name() match; otherwise accept a unique path-based
+// match. Multiple hits are an error so multi-module projects cannot silently
+// operate on the first walker result (e.g. two modules both basename "db").
+func findModuleByName(modules []Module, name string) (Module, error) {
+	var exact []Module
+	var partial []Module
 	for _, m := range modules {
-		// Match against path components
+		if m.Name() == name {
+			exact = append(exact, m)
+			continue
+		}
 		if moduleMatchesName(m, name) {
-			return m
+			partial = append(partial, m)
 		}
 	}
-	return nil
+
+	switch {
+	case len(exact) == 1:
+		return exact[0], nil
+	case len(exact) > 1:
+		return nil, ambiguousModuleError(name, exact)
+	case len(partial) == 1:
+		return partial[0], nil
+	case len(partial) > 1:
+		return nil, ambiguousModuleError(name, partial)
+	default:
+		return nil, fmt.Errorf("module %s not found", name)
+	}
+}
+
+func ambiguousModuleError(name string, matches []Module) error {
+	paths := make([]string, 0, len(matches))
+	for _, m := range matches {
+		paths = append(paths, m.Path())
+	}
+	return fmt.Errorf("module %q is ambiguous; matches: %s", name, strings.Join(paths, ", "))
 }
 
 func moduleMatchesName(m Module, name string) bool {
