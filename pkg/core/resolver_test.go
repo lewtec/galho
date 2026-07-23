@@ -1,6 +1,9 @@
 package core
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 // stubModule is a minimal Module for name-matching tests.
 type stubModule struct {
@@ -9,9 +12,9 @@ type stubModule struct {
 	name string
 }
 
-func (m stubModule) Type() string                  { return m.typ }
-func (m stubModule) Path() string                  { return m.path }
-func (m stubModule) Name() string                  { return m.name }
+func (m stubModule) Type() string                   { return m.typ }
+func (m stubModule) Path() string                   { return m.path }
+func (m stubModule) Name() string                   { return m.name }
 func (m stubModule) GenerateTasks() ([]Task, error) { return nil, nil }
 
 func TestModuleMatchesName(t *testing.T) {
@@ -25,9 +28,9 @@ func TestModuleMatchesName(t *testing.T) {
 		query string
 		want  bool
 	}{
-		{"crm", true},       // Module.Name()
-		{"db", true},        // basename
-		{"internal", true},  // path component
+		{"crm", true},      // Module.Name()
+		{"db", true},       // basename
+		{"internal", true}, // path component
 		{"other", false},
 		{"", false},
 	}
@@ -59,11 +62,63 @@ func TestFindModuleByName(t *testing.T) {
 		stubModule{path: "internal/auth/db", name: "auth"},
 		stubModule{path: "internal/crm/db", name: "crm"},
 	}
-	got := findModuleByName(mods, "crm")
-	if got == nil || got.Name() != "crm" {
+	got, err := findModuleByName(mods, "crm")
+	if err != nil {
+		t.Fatalf("findModuleByName(crm): %v", err)
+	}
+	if got.Name() != "crm" {
 		t.Fatalf("findModuleByName(crm) = %v, want crm module", got)
 	}
-	if findModuleByName(mods, "missing") != nil {
-		t.Fatal("expected nil for missing name")
+	if _, err := findModuleByName(mods, "missing"); err == nil {
+		t.Fatal("expected error for missing name")
+	} else if !strings.Contains(err.Error(), "not found") {
+		t.Fatalf("error %q should say not found", err)
+	}
+}
+
+func TestFindModuleByNameAmbiguousBasename(t *testing.T) {
+	// Both modules share basename "db"; without disambiguation the first walker
+	// result would win silently.
+	mods := []Module{
+		stubModule{path: "internal/auth/db", name: "auth"},
+		stubModule{path: "internal/crm/db", name: "crm"},
+	}
+	_, err := findModuleByName(mods, "db")
+	if err == nil {
+		t.Fatal("expected ambiguous error for shared basename db")
+	}
+	if !strings.Contains(err.Error(), "ambiguous") {
+		t.Fatalf("error %q should mention ambiguous", err)
+	}
+	if !strings.Contains(err.Error(), "internal/auth/db") || !strings.Contains(err.Error(), "internal/crm/db") {
+		t.Fatalf("error %q should list matching paths", err)
+	}
+}
+
+func TestFindModuleByNamePrefersUniqueFriendlyName(t *testing.T) {
+	// Path-based match would hit both (shared "db"), but Name() uniquely selects.
+	mods := []Module{
+		stubModule{path: "internal/auth/db", name: "auth"},
+		stubModule{path: "internal/crm/db", name: "crm"},
+	}
+	got, err := findModuleByName(mods, "auth")
+	if err != nil {
+		t.Fatalf("findModuleByName(auth): %v", err)
+	}
+	if got.Path() != "internal/auth/db" {
+		t.Fatalf("got path %q, want internal/auth/db", got.Path())
+	}
+}
+
+func TestFindModuleByNameUniquePathFallback(t *testing.T) {
+	mods := []Module{
+		stubModule{path: "internal/crm/db", name: "crm"},
+	}
+	got, err := findModuleByName(mods, "db")
+	if err != nil {
+		t.Fatalf("findModuleByName(db): %v", err)
+	}
+	if got.Name() != "crm" {
+		t.Fatalf("got name %q, want crm", got.Name())
 	}
 }
