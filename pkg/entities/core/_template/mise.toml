@@ -2,7 +2,7 @@
 bun = "1.3.10"
 go = "1.25.4"
 "go:github.com/99designs/gqlgen" = "0.17.84"
-"go:github.com/sqlc-dev/sqlc/cmd/sqlc" = "1.30.0"
+"go:github.com/sqlc-dev/sqlc/cmd/sqlc" = "1.31.1"
 
 [task_config]
 includes = [".mise/galho.toml"]
