@@ -30,7 +30,17 @@ func InstallFS(destination string, data fs.FS) error {
 
 		// WalkDir visits directories before their contents.
 		if d.IsDir() {
-			return os.MkdirAll(destPath, 0755)
+			return os.MkdirAll(destPath, 0o755)
+		}
+
+		info, err := d.Info()
+		if err != nil {
+			return err
+		}
+		perm := info.Mode().Perm()
+		if perm == 0 {
+			// Some FS implementations report no mode; default to rw-r--r--.
+			perm = 0o644
 		}
 
 		srcFile, err := data.Open(path)
@@ -39,17 +49,24 @@ func InstallFS(destination string, data fs.FS) error {
 		}
 		defer srcFile.Close()
 
-		dstFile, err := os.Create(destPath)
+		// OpenFile with perm so new files inherit the template mode (e.g. +x scripts).
+		// Chmod after open so an existing destination is rewritten to the source mode.
+		dstFile, err := os.OpenFile(destPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, perm)
 		if err != nil {
 			return err
 		}
-		defer dstFile.Close()
 
-		if _, err := io.Copy(dstFile, srcFile); err != nil {
+		if err := dstFile.Chmod(perm); err != nil {
+			dstFile.Close()
 			return err
 		}
 
-		return nil
+		if _, err := io.Copy(dstFile, srcFile); err != nil {
+			dstFile.Close()
+			return err
+		}
+
+		return dstFile.Close()
 	})
 }
 
