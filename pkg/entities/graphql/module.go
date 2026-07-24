@@ -2,7 +2,6 @@ package graphql
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/lewtec/galho/pkg/core"
 )
@@ -13,18 +12,9 @@ type GraphQLModule struct {
 }
 
 func NewGraphQLModule(path string) *GraphQLModule {
-	name := filepath.Base(filepath.Dir(path))
-	// Try to get the parent module name
-	// e.g. internal/crm/api -> crm
-
-	dir := filepath.Dir(path)
-	if filepath.Base(path) == "api" {
-		name = filepath.Base(dir)
-	}
-
 	return &GraphQLModule{
 		path: path,
-		name: name,
+		name: core.DeriveModuleName(path, "api"),
 	}
 }
 
