@@ -95,12 +95,12 @@ func GenerateTasksToml(projectRoot string) error {
 
 	miseDir := filepath.Join(projectRoot, ".mise")
 	if err := os.MkdirAll(miseDir, 0755); err != nil {
-		return err
+		return fmt.Errorf("create mise directory %s: %w", miseDir, err)
 	}
 
 	outputPath := filepath.Join(miseDir, "galho.toml")
 	if err := writeGalhoTomlAtomic(outputPath, MiseConfig{Tasks: tasks}); err != nil {
-		return err
+		return fmt.Errorf("write %s: %w", outputPath, err)
 	}
 
 	fmt.Printf("Mise tasks generated at %s\n", outputPath)
@@ -113,20 +113,30 @@ func writeGalhoTomlAtomic(path string, cfg MiseConfig) error {
 	dir := filepath.Dir(path)
 	tmp, err := os.CreateTemp(dir, "galho-*.toml")
 	if err != nil {
-		return err
+		return fmt.Errorf("create temp file: %w", err)
 	}
 	tmpName := tmp.Name()
-	// Clean up the temp file if we fail before rename.
-	defer os.Remove(tmpName)
+	// Best-effort cleanup if we fail before a successful rename.
+	// After Rename, the temp path is gone; ignoring ENOENT is intentional.
+	committed := false
+	defer func() {
+		if !committed {
+			_ = os.Remove(tmpName)
+		}
+	}()
 
 	enc := toml.NewEncoder(tmp)
 	if err := enc.Encode(cfg); err != nil {
-		tmp.Close()
-		return err
+		_ = tmp.Close()
+		return fmt.Errorf("encode galho.toml: %w", err)
 	}
 	if err := tmp.Close(); err != nil {
-		return err
+		return fmt.Errorf("close temp galho.toml: %w", err)
 	}
 
-	return os.Rename(tmpName, path)
+	if err := os.Rename(tmpName, path); err != nil {
+		return fmt.Errorf("rename galho.toml into place: %w", err)
+	}
+	committed = true
+	return nil
 }
