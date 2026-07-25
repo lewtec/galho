@@ -43,7 +43,7 @@ func resolveModule(cmd *cobra.Command, entityType string) (*CommandContext, erro
 	// Get project
 	project, err := GetProject()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get project: %w", err)
+		return nil, fmt.Errorf("get project: %w", err)
 	}
 
 	// Check for --module flag
@@ -58,7 +58,7 @@ func resolveModule(cmd *cobra.Command, entityType string) (*CommandContext, erro
 		return true
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to find modules: %w", err)
+		return nil, fmt.Errorf("find modules: %w", err)
 	}
 
 	if len(modules) == 0 {
