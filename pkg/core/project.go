@@ -1,11 +1,16 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 
 	"github.com/h2non/findup"
 )
+
+// ErrNotAGalhoProject is returned when GetProject cannot find a .galho marker
+// walking up from the process working directory.
+var ErrNotAGalhoProject = errors.New("not a galho project")
 
 type Project struct {
 	dir string
@@ -16,7 +21,7 @@ type Project struct {
 func GetProject() (*Project, error) {
 	dotgalho, err := findup.Find(".galho")
 	if err != nil {
-		return nil, fmt.Errorf("not a galho project: no .galho marker found from cwd: %w", err)
+		return nil, fmt.Errorf("%w: no .galho marker found from cwd: %w", ErrNotAGalhoProject, err)
 	}
 	// findup returns a filesystem path; use filepath (not path) so Dir is correct
 	// on platforms where the separator is not '/'.
