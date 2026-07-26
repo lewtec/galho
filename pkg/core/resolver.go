@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -9,6 +10,11 @@ import (
 )
 
 const moduleFlagName = "module"
+
+// Module-resolution sentinel errors. Callers can match with errors.Is.
+var ErrNoModules = errors.New("no modules found")
+var ErrModuleNotFound = errors.New("module not found")
+var ErrAmbiguousModule = errors.New("module is ambiguous")
 
 // setupModuleResolution adds module resolution to an entity command
 func setupModuleResolution(cmd *cobra.Command, entityType string) {
@@ -62,7 +68,7 @@ func resolveModule(cmd *cobra.Command, entityType string) (*CommandContext, erro
 	}
 
 	if len(modules) == 0 {
-		return nil, fmt.Errorf("no %s modules found in project", entityType)
+		return nil, fmt.Errorf("%w: no %s modules in project", ErrNoModules, entityType)
 	}
 
 	// Select module
@@ -117,7 +123,7 @@ func findModuleByName(modules []Module, name string) (Module, error) {
 	case len(partial) > 1:
 		return nil, ambiguousModuleError(name, partial)
 	default:
-		return nil, fmt.Errorf("module %s not found", name)
+		return nil, fmt.Errorf("%w: %s", ErrModuleNotFound, name)
 	}
 }
 
@@ -126,7 +132,7 @@ func ambiguousModuleError(name string, matches []Module) error {
 	for _, m := range matches {
 		paths = append(paths, m.Path())
 	}
-	return fmt.Errorf("module %q is ambiguous; matches: %s", name, strings.Join(paths, ", "))
+	return fmt.Errorf("%w: %q matches: %s", ErrAmbiguousModule, name, strings.Join(paths, ", "))
 }
 
 func moduleMatchesName(m Module, name string) bool {

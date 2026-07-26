@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"strings"
 	"testing"
 )
@@ -71,6 +72,8 @@ func TestFindModuleByName(t *testing.T) {
 	}
 	if _, err := findModuleByName(mods, "missing"); err == nil {
 		t.Fatal("expected error for missing name")
+	} else if !errors.Is(err, ErrModuleNotFound) {
+		t.Fatalf("error %v should wrap ErrModuleNotFound", err)
 	} else if !strings.Contains(err.Error(), "not found") {
 		t.Fatalf("error %q should say not found", err)
 	}
@@ -86,6 +89,9 @@ func TestFindModuleByNameAmbiguousBasename(t *testing.T) {
 	_, err := findModuleByName(mods, "db")
 	if err == nil {
 		t.Fatal("expected ambiguous error for shared basename db")
+	}
+	if !errors.Is(err, ErrAmbiguousModule) {
+		t.Fatalf("error %v should wrap ErrAmbiguousModule", err)
 	}
 	if !strings.Contains(err.Error(), "ambiguous") {
 		t.Fatalf("error %q should mention ambiguous", err)
