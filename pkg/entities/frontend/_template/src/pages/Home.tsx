@@ -1,22 +1,11 @@
-import { Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLazyLoadQuery, graphql } from 'react-relay';
 
-// This query will be compiled by relay-compiler
-// Make sure your GraphQL schema has a 'viewer' query or adjust accordingly
-const HomeQuery = graphql`
-  query HomeQuery {
-    viewer {
-      id
-    }
-  }
-`;
+// Wire Relay here only with a query that matches the GraphQL schema (sibling
+// api/schema.graphql). A live graphql`` tag for undefined fields fails
+// relay-compiler for the whole frontend module.
 
-function HomeContent() {
+export default function Home() {
   const { t } = useTranslation();
-
-  // Uncomment this when you have a GraphQL server running
-  // const data = useLazyLoadQuery(HomeQuery, {});
 
   return (
     <div className="space-y-8">
@@ -78,13 +67,5 @@ function HomeContent() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function Home() {
-  return (
-    <Suspense fallback={<div className="loading loading-spinner loading-lg"></div>}>
-      <HomeContent />
-    </Suspense>
   );
 }
