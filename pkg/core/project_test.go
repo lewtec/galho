@@ -1,9 +1,9 @@
 package core
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 )
 
@@ -59,7 +59,7 @@ func TestGetProjectMissingMarker(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error when .galho is missing")
 	}
-	if !strings.Contains(err.Error(), "not a galho project") {
-		t.Fatalf("error %q should mention not a galho project", err)
+	if !errors.Is(err, ErrNotAGalhoProject) {
+		t.Fatalf("error %v should be ErrNotAGalhoProject", err)
 	}
 }
