@@ -1,11 +1,16 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 )
+
+// Picker sentinel errors (interactive module selection).
+var ErrSelectionCancelled = errors.New("selection cancelled")
+var ErrInvalidSelection = errors.New("invalid selection")
 
 // selectModuleInteractive presents an interactive picker for module selection
 func selectModuleInteractive(modules []Module, entityType string) (Module, error) {
@@ -43,7 +48,7 @@ func selectWithFzf(modules []Module, entityType string) (Module, error) {
 	output, err := cmd.Output()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 130 {
-			return nil, fmt.Errorf("selection cancelled")
+			return nil, ErrSelectionCancelled
 		}
 		return nil, fmt.Errorf("fzf failed: %w", err)
 	}
@@ -57,7 +62,7 @@ func selectWithFzf(modules []Module, entityType string) (Module, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("invalid selection")
+	return nil, ErrInvalidSelection
 }
 
 // selectWithPrompt uses simple numbered prompt for selection
@@ -75,7 +80,7 @@ func selectWithPrompt(modules []Module, entityType string) (Module, error) {
 	}
 
 	if choice < 1 || choice > len(modules) {
-		return nil, fmt.Errorf("invalid selection: %d", choice)
+		return nil, fmt.Errorf("%w: %d", ErrInvalidSelection, choice)
 	}
 
 	return modules[choice-1], nil
