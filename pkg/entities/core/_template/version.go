@@ -1,10 +1,6 @@
 package version
 
-import "embed"
-
-func init() {
-	var _ embed.FS // without this the go LSP will delete the import
-}
+import _ "embed"
 
 //go:embed version.txt
 var Version string
