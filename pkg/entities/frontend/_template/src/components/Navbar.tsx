@@ -3,8 +3,23 @@ import { useTranslation } from 'react-i18next';
 import ThemeToggle from './ThemeToggle';
 import LanguageSelector from './LanguageSelector';
 
+const NAV_ITEMS = [
+  { to: '/', labelKey: 'nav.home' },
+  { to: '/about', labelKey: 'nav.about' },
+  { to: '/contact', labelKey: 'nav.contact' },
+] as const;
+
 export default function Navbar() {
   const { t } = useTranslation();
+
+  // Build a fresh list per menu so mobile and desktop trees do not share
+  // the same React element instances.
+  const navLinks = () =>
+    NAV_ITEMS.map(({ to, labelKey }) => (
+      <li key={to}>
+        <Link to={to}>{t(labelKey)}</Link>
+      </li>
+    ));
 
   return (
     <nav className="navbar bg-base-100 shadow-lg">
@@ -30,15 +45,7 @@ export default function Navbar() {
             tabIndex={0}
             className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
           >
-            <li>
-              <Link to="/">{t('nav.home')}</Link>
-            </li>
-            <li>
-              <Link to="/about">{t('nav.about')}</Link>
-            </li>
-            <li>
-              <Link to="/contact">{t('nav.contact')}</Link>
-            </li>
+            {navLinks()}
           </ul>
         </div>
         <Link to="/" className="btn btn-ghost text-xl">
@@ -47,17 +54,7 @@ export default function Navbar() {
       </div>
 
       <div className="navbar-center hidden lg:flex">
-        <ul className="menu menu-horizontal px-1">
-          <li>
-            <Link to="/">{t('nav.home')}</Link>
-          </li>
-          <li>
-            <Link to="/about">{t('nav.about')}</Link>
-          </li>
-          <li>
-            <Link to="/contact">{t('nav.contact')}</Link>
-          </li>
-        </ul>
+        <ul className="menu menu-horizontal px-1">{navLinks()}</ul>
       </div>
 
       <div className="navbar-end gap-2">
