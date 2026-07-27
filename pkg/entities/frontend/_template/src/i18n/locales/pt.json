@@ -11,5 +11,13 @@
   "home": {
     "title": "Bem-vindo ao Seu App",
     "subtitle": "Uma aplicação React moderna com roteamento, internacionalização e suporte a temas"
+  },
+  "contact": {
+    "intro": "Envie uma mensagem e entraremos em contato.",
+    "email": "E-mail",
+    "emailPlaceholder": "email@exemplo.com",
+    "message": "Mensagem",
+    "messagePlaceholder": "Sua mensagem...",
+    "send": "Enviar mensagem"
   }
 }
