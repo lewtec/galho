@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Theme = 'light' | 'dark';
 
@@ -17,6 +18,7 @@ function applyTheme(theme: Theme) {
 }
 
 export default function ThemeToggle() {
+  const { t } = useTranslation();
   // Resolve and apply before first paint so DaisyUI does not flash the default theme.
   const [theme, setTheme] = useState<Theme>(() => {
     const initial = resolveInitialTheme();
@@ -31,8 +33,17 @@ export default function ThemeToggle() {
     applyTheme(newTheme);
   };
 
+  // Label names the theme that will become active (uses existing theme.* keys).
+  const nextLabel = theme === 'light' ? t('theme.dark') : t('theme.light');
+
   return (
-    <button onClick={toggleTheme} className="btn btn-ghost btn-circle">
+    <button
+      type="button"
+      onClick={toggleTheme}
+      className="btn btn-ghost btn-circle"
+      aria-label={nextLabel}
+      title={nextLabel}
+    >
       {theme === 'light' ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -40,6 +51,7 @@ export default function ThemeToggle() {
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
@@ -55,6 +67,7 @@ export default function ThemeToggle() {
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
+          aria-hidden="true"
         >
           <path
             strokeLinecap="round"
