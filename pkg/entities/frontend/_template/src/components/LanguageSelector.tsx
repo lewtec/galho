@@ -1,10 +1,15 @@
 import { useTranslation } from 'react-i18next';
+import { reportError } from '../utils/reportError';
 
 export default function LanguageSelector() {
   const { i18n } = useTranslation();
 
   const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
+    // changeLanguage returns a Promise; surface failures through the shared
+    // reporter instead of an unhandled rejection.
+    void i18n.changeLanguage(lng).catch((error: unknown) => {
+      reportError(error, { source: 'i18n.changeLanguage', lng });
+    });
   };
 
   return (
