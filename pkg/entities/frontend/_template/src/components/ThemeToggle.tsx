@@ -1,30 +1,34 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+
+type Theme = 'light' | 'dark';
+
+function resolveInitialTheme(): Theme {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light' || savedTheme === 'dark') {
+    return savedTheme;
+  }
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
+}
+
+function applyTheme(theme: Theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+}
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
-  useEffect(() => {
-    // Get theme from localStorage or detect from browser
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-
-    let initialTheme: 'light' | 'dark';
-    if (savedTheme) {
-      initialTheme = savedTheme;
-    } else {
-      // Detect browser's preferred color scheme
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      initialTheme = prefersDark ? 'dark' : 'light';
-    }
-
-    setTheme(initialTheme);
-    document.documentElement.setAttribute('data-theme', initialTheme);
-  }, []);
+  // Resolve and apply before first paint so DaisyUI does not flash the default theme.
+  const [theme, setTheme] = useState<Theme>(() => {
+    const initial = resolveInitialTheme();
+    applyTheme(initial);
+    return initial;
+  });
 
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
+    const newTheme: Theme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
+    applyTheme(newTheme);
   };
 
   return (
