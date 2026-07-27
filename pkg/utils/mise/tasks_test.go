@@ -97,14 +97,7 @@ func TestGenerateTasksTomlWritesUnderProjectRoot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cwd, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Chdir(root); err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = os.Chdir(cwd) })
+	t.Chdir(root)
 
 	if err := GenerateTasksToml(""); err != nil {
 		t.Fatalf("GenerateTasksToml: %v", err)
