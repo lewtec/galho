@@ -3,17 +3,12 @@ package database
 import (
 	"embed"
 	"io/fs"
+
+	"github.com/lewtec/galho/pkg/utils/scaffold"
 )
 
 //go:embed all:_template
 var template embed.FS
 
-var Template fs.FS
-
-func init() {
-	var err error
-	Template, err = fs.Sub(template, "_template")
-	if err != nil {
-		panic(err)
-	}
-}
+// Template is the entity's scaffold tree (contents of _template/).
+var Template fs.FS = scaffold.MustSub(template, "_template")
