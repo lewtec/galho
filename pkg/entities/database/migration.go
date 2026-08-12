@@ -51,7 +51,46 @@ func newMigrationCreateCommand() *cobra.Command {
 	}
 }
 
+// validateMigrationName rejects names that can escape the migrations directory
+// via path separators or ".." segments when joined with a timestamp prefix.
+func validateMigrationName(name string) error {
+	if name == "" {
+		return fmt.Errorf("migration name is required")
+	}
+	if name != filepath.Base(name) || strings.Contains(name, "..") {
+		return fmt.Errorf("invalid migration name %q: must be a single path segment without ..", name)
+	}
+	// Defense in depth: only allow common migration identifier characters.
+	for _, r := range name {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '_' || r == '-' {
+			continue
+		}
+		return fmt.Errorf("invalid migration name %q: use only letters, digits, underscore, and hyphen", name)
+	}
+	return nil
+}
+
+// migrationFilePath joins migrationsDir with filename and rejects escapes.
+func migrationFilePath(migrationsDir, filename string) (string, error) {
+	dest := filepath.Join(migrationsDir, filename)
+	rel, err := filepath.Rel(migrationsDir, dest)
+	if err != nil {
+		return "", fmt.Errorf("invalid migration path %q: %w", filename, err)
+	}
+	if rel == ".." || strings.HasPrefix(rel, ".."+string(os.PathSeparator)) || filepath.IsAbs(rel) {
+		return "", fmt.Errorf("migration path escapes directory: %q", filename)
+	}
+	if rel != filepath.Base(rel) {
+		return "", fmt.Errorf("migration path must be a single file under migrations: %q", filename)
+	}
+	return dest, nil
+}
+
 func createMigration(module *DatabaseModule, name string) error {
+	if err := validateMigrationName(name); err != nil {
+		return err
+	}
+
 	timestamp := time.Now().Format("20060102150405")
 	filenameUp := fmt.Sprintf("%s_%s.up.sql", timestamp, name)
 	filenameDown := fmt.Sprintf("%s_%s.down.sql", timestamp, name)
@@ -62,8 +101,14 @@ func createMigration(module *DatabaseModule, name string) error {
 		return fmt.Errorf("failed to create migrations directory: %w", err)
 	}
 
-	filepathUp := filepath.Join(migrationsDir, filenameUp)
-	filepathDown := filepath.Join(migrationsDir, filenameDown)
+	filepathUp, err := migrationFilePath(migrationsDir, filenameUp)
+	if err != nil {
+		return err
+	}
+	filepathDown, err := migrationFilePath(migrationsDir, filenameDown)
+	if err != nil {
+		return err
+	}
 
 	templateUp := fmt.Sprintf(`-- Migration: %s (up)
 -- Created: %s
