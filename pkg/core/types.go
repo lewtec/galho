@@ -20,8 +20,3 @@ type Task struct {
 	Dir         string
 	Depends     []string
 }
-
-// Generator defines the interface for creating new modules.
-type Generator interface {
-	Generate(path string, name string) error
-}
