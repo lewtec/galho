@@ -20,11 +20,13 @@ const (
 	commandContextKey contextKey = "command_context"
 )
 
-// SetCommandContext stores the command context in the cobra command
+// SetCommandContext stores the command context in the cobra command's context.
+//
+// cmd.Context() must already be set. cobra.Command.Execute / ExecuteContext
+// seed the root context before PreRun and Run, so entity PersistentPreRun
+// hooks rely on that instead of inventing context.Background here.
+// Tests that call this without Execute must cmd.SetContext first (e.g. t.Context()).
 func SetCommandContext(cmd *cobra.Command, ctx *CommandContext) {
-	if cmd.Context() == nil {
-		cmd.SetContext(context.Background())
-	}
 	cmd.SetContext(context.WithValue(cmd.Context(), commandContextKey, ctx))
 }
 
