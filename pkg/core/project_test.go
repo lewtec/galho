@@ -18,14 +18,7 @@ func TestGetProjectFindsMarker(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cwd, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Chdir(nested); err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = os.Chdir(cwd) })
+	t.Chdir(nested)
 
 	p, err := GetProject()
 	if err != nil {
@@ -46,16 +39,9 @@ func TestGetProjectFindsMarker(t *testing.T) {
 
 func TestGetProjectMissingMarker(t *testing.T) {
 	root := t.TempDir()
-	cwd, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := os.Chdir(root); err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = os.Chdir(cwd) })
+	t.Chdir(root)
 
-	_, err = GetProject()
+	_, err := GetProject()
 	if err == nil {
 		t.Fatal("expected error when .galho is missing")
 	}
