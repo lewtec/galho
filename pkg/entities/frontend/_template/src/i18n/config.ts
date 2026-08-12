@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import en from './locales/en.json';
 import pt from './locales/pt.json';
+import { reportError } from '../utils/reportError';
 
 const resources = {
   en: { translation: en },
@@ -15,7 +16,9 @@ const getBrowserLanguage = (): string => {
   return resources[browserLang as keyof typeof resources] ? browserLang : 'en';
 };
 
-i18n
+// init returns a Promise; surface failures through the shared reporter instead of
+// an unhandled rejection (or silent failure if the host swallows them).
+void i18n
   .use(initReactI18next)
   .init({
     resources,
@@ -24,6 +27,9 @@ i18n
     interpolation: {
       escapeValue: false,
     },
+  })
+  .catch((error: unknown) => {
+    reportError(error, { source: 'i18n.init' });
   });
 
 export default i18n;
