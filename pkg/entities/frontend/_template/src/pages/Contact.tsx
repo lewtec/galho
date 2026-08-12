@@ -8,30 +8,27 @@ export default function Contact() {
       <div className="card-body">
         <h1 className="card-title text-3xl">{t('nav.contact')}</h1>
         <div className="space-y-4">
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua.
-          </p>
+          <p>{t('contact.intro')}</p>
           <div className="form-control">
             <label className="label">
-              <span className="label-text">Email</span>
+              <span className="label-text">{t('contact.email')}</span>
             </label>
             <input
               type="email"
-              placeholder="email@example.com"
+              placeholder={t('contact.emailPlaceholder')}
               className="input input-bordered"
             />
           </div>
           <div className="form-control">
             <label className="label">
-              <span className="label-text">Message</span>
+              <span className="label-text">{t('contact.message')}</span>
             </label>
             <textarea
               className="textarea textarea-bordered h-24"
-              placeholder="Your message..."
+              placeholder={t('contact.messagePlaceholder')}
             ></textarea>
           </div>
-          <button className="btn btn-primary">Send Message</button>
+          <button className="btn btn-primary">{t('contact.send')}</button>
         </div>
       </div>
     </div>
