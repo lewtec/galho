@@ -3,7 +3,10 @@ package core
 import (
 	"fmt"
 	"maps"
+	"os"
+	"path/filepath"
 	"slices"
+	"strings"
 )
 
 var moduleFinders = make(map[string]func(*Project) ([]Module, error))
@@ -39,4 +42,35 @@ func (p *Project) FindModules(yield func(ModuleFound) bool) error {
 		}
 	}
 	return nil
+}
+
+// WalkModules walks the project directory and calls matchFunc on each file.
+// It skips common directories like .git and node_modules.
+func WalkModules(p *Project, matchFunc func(path string, info os.FileInfo) (Module, error)) ([]Module, error) {
+	var modules []Module
+
+	err := filepath.Walk(p.Dir(), func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			// Skip .git, node_modules, etc
+			if strings.HasPrefix(info.Name(), ".") || info.Name() == "node_modules" {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		mod, err := matchFunc(path, info)
+		if err != nil {
+			return err
+		}
+		if mod != nil {
+			modules = append(modules, mod)
+		}
+
+		return nil
+	})
+
+	return modules, err
 }
