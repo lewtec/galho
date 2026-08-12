@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/lewtec/galho/pkg/core"
+	// Registers `generate app` (core app scaffold template).
+	_ "github.com/lewtec/galho/pkg/entities/core"
 	_ "github.com/lewtec/galho/pkg/entities/database"
 	_ "github.com/lewtec/galho/pkg/entities/frontend"
 	_ "github.com/lewtec/galho/pkg/entities/graphql"

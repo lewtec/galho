@@ -2,7 +2,8 @@ FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+# Scaffolded apps may not have go.sum until the first tidy/download.
+COPY go.mod ./
 RUN go mod download
 
 COPY . .
