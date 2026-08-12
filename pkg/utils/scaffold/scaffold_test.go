@@ -1,6 +1,7 @@
 package scaffold
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
@@ -42,4 +43,67 @@ func TestInstallFSRejectsEscapingPath(t *testing.T) {
 	if err := InstallFS(dest, evil); err == nil {
 		t.Fatal("expected escape rejection")
 	}
+}
+
+func TestInstallFSPreservesExecutableMode(t *testing.T) {
+	dest := t.TempDir()
+	src := fstest.MapFS{
+		"make_release": {
+			Data: []byte("#!/usr/bin/env bash\necho ok\n"),
+			Mode: 0o755,
+		},
+		"readme.txt": {
+			Data: []byte("docs\n"),
+			Mode: 0o644,
+		},
+	}
+	if err := InstallFS(dest, src); err != nil {
+		t.Fatal(err)
+	}
+
+	script := filepath.Join(dest, "make_release")
+	info, err := os.Stat(script)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Mode().Perm()&0o111 == 0 {
+		t.Fatalf("expected executable bits on make_release, got %o", info.Mode().Perm())
+	}
+
+	readme := filepath.Join(dest, "readme.txt")
+	info, err = os.Stat(readme)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Mode().Perm()&0o111 != 0 {
+		t.Fatalf("expected non-executable readme, got %o", info.Mode().Perm())
+	}
+}
+
+func TestInstallFSRewritesExistingFileMode(t *testing.T) {
+	dest := t.TempDir()
+	path := filepath.Join(dest, "tool.sh")
+	if err := os.WriteFile(path, []byte("old\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	src := fstest.MapFS{
+		"tool.sh": {
+			Data: []byte("#!/bin/sh\n"),
+			Mode: 0o755,
+		},
+	}
+	if err := InstallFS(dest, src); err != nil {
+		t.Fatal(err)
+	}
+
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := info.Mode().Perm(); got&0o111 == 0 {
+		t.Fatalf("expected +x after reinstall, got %o", got)
+	}
+	// Sanity: still a regular file mode we can inspect via fs.FileMode
+	_ = fs.FileMode(0)
 }
