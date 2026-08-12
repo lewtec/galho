@@ -1,35 +1,38 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 if [ $# == 1 ]; then
-	VERSION="$1"; shift
+  VERSION="$1"; shift
 else
-	echo ./make_release versao_nova >&2
-	exit 1
+  echo ./make_release versao_nova >&2
+  exit 1
 fi
 
 CURRENT_VERSION=($(cat version.txt | sed 's;\.; ;g'))
 
 case "$VERSION" in
-	patch)
-		VERSION="${CURRENT_VERSION[0]}.${CURRENT_VERSION[1]}.$((${CURRENT_VERSION[2]}+1))"
-	;;
-	minor)
-		VERSION="${CURRENT_VERSION[0]}.$((${CURRENT_VERSION[1]}+1)).0"
-	;;
-	major)
-		VERSION="$((${CURRENT_VERSION[0]}+1)).0.0"
-	;;
+  patch)
+    VERSION="${CURRENT_VERSION[0]}.${CURRENT_VERSION[1]}.$((${CURRENT_VERSION[2]}+1))"
+    ;;
+  minor)
+    VERSION="${CURRENT_VERSION[0]}.$((${CURRENT_VERSION[1]}+1)).0"
+    ;;
+  major)
+    VERSION="$((${CURRENT_VERSION[0]}+1)).0.0"
+    ;;
 esac
 
 printf "%s" "$VERSION" > version.txt
 
-# Atualiza version.txt do template
-printf "%s" "$VERSION" > pkg/entities/core/template/version.txt
+# Keep scaffolded app template version in lockstep with the repo release.
+# Path is _template (embed root), not template (Go package name).
+TEMPLATE_VERSION_TXT=pkg/entities/core/_template/version.txt
+printf "%s" "$VERSION" > "$TEMPLATE_VERSION_TXT"
 
 git add -A
 git commit -sm "bump to $VERSION"
 if [[ ! -v NO_TAG ]]; then
-	git tag "$VERSION"
-	git push --tag
+  git tag "$VERSION"
+  git push --tag
 fi
 git push
