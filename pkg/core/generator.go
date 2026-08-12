@@ -2,6 +2,8 @@ package core
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 
 	"github.com/spf13/cobra"
 )
@@ -16,7 +18,12 @@ func RegisterGenerateCommand(name string, cmd *cobra.Command) {
 	generateCommands[name] = cmd
 }
 
-// GetGenerateCommands returns all registered generate commands.
-func GetGenerateCommands() map[string]*cobra.Command {
-	return generateCommands
+// GetGenerateCommands returns registered generate commands ordered by registration name.
+func GetGenerateCommands() []*cobra.Command {
+	names := slices.Sorted(maps.Keys(generateCommands))
+	out := make([]*cobra.Command, 0, len(names))
+	for _, name := range names {
+		out = append(out, generateCommands[name])
+	}
+	return out
 }
